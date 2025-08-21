@@ -1,0 +1,82 @@
+/* src/components/DossiersTable.css */
+.table-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-container h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+thead th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+.status-pending {
+  background-color: #3498db; /* En attente (bleu) */
+}
+
+.status-validated {
+  background-color: #2ecc71; /* Validé (vert) */
+}
+
+.status-rejected {
+  background-color: #e74c3c; /* Rejeté (rouge) */
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.validate-btn {
+  color: #2ecc71;
+}
+
+.validate-btn:hover {
+  color: #27ae60;
+}
+
+.reject-btn {
+  color: #e74c3c;
+}
+
+.reject-btn:hover {
+  color: #c0392b;
+}
