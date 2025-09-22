@@ -23,7 +23,7 @@ const MerchantDetail = () => {
       return;
     }
     try {
-      const res = await axios.get(`https://moov-money-backend.onrender.com/api/merchants/${id}`, {
+      const res = await axios.get(`https://backend-vercel-one-kappa.vercel.app/api/merchants/${id}`, {
         headers: { 'x-auth-token': token },
       });
       setMerchant(res.data);
@@ -43,7 +43,7 @@ const MerchantDetail = () => {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      await axios.post(`https://moov-money-backend.onrender.com/api/merchants/validate/${id}`, {},
+      await axios.post(`https://backend-vercel-one-kappa.vercel.app/api/merchants/validate/${id}`, {},
         {
           headers: { 'x-auth-token': token },
         }
@@ -64,7 +64,7 @@ const MerchantDetail = () => {
       return;
     }
     try {
-      await axios.post(`https://moov-money-backend.onrender.com/api/merchants/reject/${id}`, { rejectionReason }, {
+      await axios.post(`https://backend-vercel-one-kappa.vercel.app/api/merchants/reject/${id}`, { rejectionReason }, {
         headers: { 'x-auth-token': token },
       });
       alert('Marchand rejeté avec succès.');

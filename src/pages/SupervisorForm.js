@@ -21,7 +21,7 @@ const SupervisorForm = () => {
       const fetchSupervisor = async () => {
         const token = localStorage.getItem('token');
         try {
-          const res = await axios.get(`https://moov-money-backend.onrender.com/api/agents/${id}`, {
+          const res = await axios.get(`https://backend-vercel-one-kappa.vercel.app/api/agents/${id}`, {
             headers: { 'x-auth-token': token },
           });
           setFormData({
@@ -51,11 +51,11 @@ const SupervisorForm = () => {
         if (!dataToUpdate.motDePasse) {
           delete dataToUpdate.motDePasse;
         }
-        await axios.put(`https://moov-money-backend.onrender.com/api/agents/${id}`, dataToUpdate, {
+        await axios.put(`https://backend-vercel-one-kappa.vercel.app/api/agents/${id}`, dataToUpdate, {
           headers: { 'x-auth-token': token },
         });
       } else {
-        await axios.post('https://moov-money-backend.onrender.com/api/agents', formData, {
+        await axios.post('https://backend-vercel-one-kappa.vercel.app/api/agents', formData, {
           headers: { 'x-auth-token': token },
         });
       }

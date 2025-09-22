@@ -20,7 +20,7 @@ const Agents = () => {
       return;
     }
     try {
-      const res = await axios.get('https://moov-money-backend.onrender.com/api/agents/all-agents', {
+      const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', {
         headers: { 'x-auth-token': token },
       });
       setAgents(res.data);

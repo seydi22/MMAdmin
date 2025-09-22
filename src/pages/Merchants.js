@@ -28,7 +28,7 @@ const Merchants = () => {
         throw new Error('Authentification requise.');
       }
 
-      const url = `https://moov-money-backend.onrender.com/api/merchants/all`;
+      const url = `https://backend-vercel-one-kappa.vercel.app/api/merchants/all`;
       const params = {
         statut: statusFilter === 'Tous' ? '' : statusFilter,
         search: searchTerm,

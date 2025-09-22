@@ -31,9 +31,9 @@ const Dashboard = () => {
 
     try {
       const [supervisorsRes, merchantsRes, agentsRes] = await Promise.all([
-        axios.get('https://moov-money-backend.onrender.com/api/agents/all-supervisors', config),
-        axios.get('https://moov-money-backend.onrender.com/api/merchants/all', config),
-        axios.get('https://moov-money-backend.onrender.com/api/agents/all-agents', config),
+        axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', config),
+        axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/all', config),
+        axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', config),
       ]);
 
       setSupervisors(supervisorsRes.data);

@@ -23,7 +23,7 @@ const Supervisors = () => {
       return;
     }
     try {
-      const res = await axios.get('https://moov-money-backend.onrender.com/api/agents/all-supervisors', {
+      const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', {
         headers: { 'x-auth-token': token },
       });
       setSupervisors(res.data);
@@ -42,7 +42,7 @@ const Supervisors = () => {
   const handleDeleteSupervisor = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`https://moov-money-backend.onrender.com/api/agents/${id}`, {
+      await axios.delete(`https://backend-vercel-one-kappa.vercel.app/api/agents/${id}`, {
         headers: { 'x-auth-token': token },
       });
       setSupervisors(supervisors.filter((sup) => sup._id !== id));

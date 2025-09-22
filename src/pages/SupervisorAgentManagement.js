@@ -17,7 +17,7 @@ const SupervisorAgentManagement = () => {
   const [affiliation, setAffiliation] = useState('');
   const [role, setRole] = useState('agent');
 
-  const API_URL = 'https://moov-money-backend.onrender.com/api/agents';
+  const API_URL = 'https://backend-vercel-one-kappa.vercel.app/api/agents';
 
   const fetchAgents = async () => {
     setIsLoading(true);

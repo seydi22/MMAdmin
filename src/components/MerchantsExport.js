@@ -18,7 +18,7 @@ const MerchantsExport = () => {
         throw new Error('Authentification requise pour l\'exportation.');
       }
 
-      const response = await axios.get('https://moov-money-backend.onrender.com/api/merchants/export', {
+      const response = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/export', {
         headers: {
           'x-auth-token': token,
         },
