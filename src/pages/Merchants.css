@@ -1,196 +1,41 @@
-/* src/pages/Merchants.css - Style amélioré */
+/* src/pages/Merchants.css */
 
-/* Mise en page de base pour un look moderne */
-body {
-    background-color: #eef2f5;
-    font-family: 'Inter', sans-serif;
+.filters-container {
+  display: flex;
+  gap: var(--spacing-md);
 }
 
-.dashboard-layout {
-    display: flex;
+.merchant-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.main-content {
-    flex-grow: 1;
-    padding: 2.5rem; /* Augmentation de l'espacement */
-    background-color: #eef2f5;
+.merchant-row:hover {
+  background-color: var(--color-background-grey);
 }
 
-/* Conteneur de filtre plus élégant */
-.filter-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background-color: #ffffff;
-    border-radius: 1rem; /* Coins plus arrondis */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Ombre plus profonde */
-}
-
-/* Champs de saisie et de sélection stylisés */
-.search-input,
-.status-select {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid #e0e6ed;
-    border-radius: 0.75rem; /* Coins arrondis */
-    font-size: 1rem;
-    color: #4a5568;
-    background-color: #f9fafb;
-    transition: all 0.3s ease-in-out;
-}
-
-.search-input::placeholder {
-    color: #a0aec0;
-}
-
-.search-input:focus,
-.status-select:focus {
-    outline: none;
-    border-color: #4c51bf;
-    box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.2);
-    background-color: #ffffff;
-}
-
-/* Tableaux dynamiques et stylisés */
-.merchants-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 0.75rem;
-    margin-top: -0.75rem;
-}
-
-.merchants-table th {
-    text-align: left;
-    padding: 1rem 1.5rem;
-    background-color: #34495e;
-    color: #ffffff;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
-
-.merchants-table thead tr {
-    border-radius: 1rem;
-    overflow: hidden;
-}
-
-.merchants-table th:first-child {
-    border-top-left-radius: 1rem;
-}
-
-.merchants-table th:last-child {
-    border-top-right-radius: 1rem;
-}
-
-.merchants-table td {
-    padding: 1.5rem;
-    background-color: #ffffff;
-    border-bottom: none;
-    color: #4a5568;
-    font-size: 0.95rem;
-    transition: all 0.2s ease-in-out;
-}
-
-.table-row-item {
-    cursor: pointer;
-}
-
-.table-row-item:hover {
-    background-color: #f7f8f9;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    transform: translateY(-4px); /* Effet de lévitation */
-}
-
-.table-row-item:first-of-type td {
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
-}
-
-.table-row-item:last-of-type td {
-    border-bottom-left-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-    border-bottom: none;
-}
-
-/* Badges de statut améliorés */
 .status-badge {
-    padding: 0.3rem 0.8rem;
-    border-radius: 1rem;
-    font-size: 0.85em;
-    font-weight: bold;
-    color: #ffffff;
-    text-transform: capitalize;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: capitalize;
 }
 
 .status-validé {
-    background-color: #2ecc71;
+  background-color: var(--color-success);
 }
 
 .status-rejeté {
-    background-color: #e74c3c;
+  background-color: var(--color-danger);
 }
 
 .status-en_attente {
-    background-color: #f39c12;
+  background-color: var(--color-warning);
+  color: var(--color-text-dark);
 }
 
-.error-message {
-    color: #e74c3c;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* Styles pour les appareils mobiles */
-@media (max-width: 768px) {
-    .main-content {
-        padding: 1.5rem;
-    }
-    .filter-container {
-        flex-direction: column;
-    }
-    .merchants-table,
-    .merchants-table tbody,
-    .merchants-table tr,
-    .merchants-table td {
-        display: block;
-        width: 100%;
-        border-bottom: none;
-    }
-    .merchants-table thead {
-        display: none;
-    }
-    .merchants-table tr {
-        margin-bottom: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-    .merchants-table td {
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-    }
-    .merchants-table td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 1rem;
-        font-weight: bold;
-        text-align: left;
-        color: #2c3e50;
-    }
-    .merchants-table td:first-of-type {
-        border-top: none;
-        border-top-left-radius: 1rem;
-        border-top-right-radius: 1rem;
-    }
-    .merchants-table td:last-of-type {
-        border-bottom-left-radius: 1rem;
-        border-bottom-right-radius: 1rem;
-    }
+.text-danger {
+    color: var(--color-danger);
 }

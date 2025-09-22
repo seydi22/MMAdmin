@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import SupervisorsTable from '../components/SupervisorsTable';
 import './Dashboard.css'; // On réutilise les styles pour le layout
+import './Supervisors.css'; // Changed from Dashboard.css
 
 const Supervisors = () => {
   const [supervisors, setSupervisors] = useState([]);
@@ -23,7 +24,7 @@ const Supervisors = () => {
     }
     try {
       const res = await axios.get('https://moov-money-backend.onrender.com/api/agents/all-supervisors', {
-        headers: { 'x-auth-token': token }
+        headers: { 'x-auth-token': token },
       });
       setSupervisors(res.data);
     } catch (err) {
@@ -42,34 +43,44 @@ const Supervisors = () => {
     const token = localStorage.getItem('token');
     try {
       await axios.delete(`https://moov-money-backend.onrender.com/api/agents/${id}`, {
-        headers: { 'x-auth-token': token }
+        headers: { 'x-auth-token': token },
       });
-      setSupervisors(supervisors.filter(sup => sup._id !== id));
+      setSupervisors(supervisors.filter((sup) => sup._id !== id));
       alert('Superviseur supprimé avec succès.');
     } catch (err) {
       console.error(err);
       setError('Erreur lors de la suppression.');
     }
   };
-  
-  if (loading) return <div>Chargement...</div>;
-  if (error) return <div>{error}</div>;
+
+  if (loading) return <div className="loading-container">Chargement...</div>;
+  if (error) return <div className="error-container">{error}</div>;
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <div className="main-content">
+      <main className="main-content">
         <header className="main-header">
-          <h2>Gestion des superviseurs</h2>
+          <h1>Gestion des superviseurs</h1>
         </header>
-        <div className="table-header">
-          <h3>Liste des superviseurs</h3>
-          <button className="add-btn" onClick={() => navigate('/supervisors/new')}>
-            Ajouter un superviseur
-          </button>
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h3>Liste des superviseurs</h3>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate('/supervisors/new')}
+            >
+              Ajouter un superviseur
+            </button>
+          </div>
+          <div className="card-body">
+            <SupervisorsTable
+              supervisors={supervisors}
+              onDeleteSupervisor={handleDeleteSupervisor}
+            />
+          </div>
         </div>
-        <SupervisorsTable supervisors={supervisors} onDeleteSupervisor={handleDeleteSupervisor} />
-      </div>
+      </main>
     </div>
   );
 };

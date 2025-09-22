@@ -8,119 +8,125 @@ import './Dashboard.css'; // S'assurer que les styles du tableau de bord sont in
 import './Merchants.css';
 
 const Merchants = () => {
-    const [merchants, setMerchants] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('Tous');
-    const navigate = useNavigate();
-    
-    // Fonction pour naviguer vers la page de détail d'un marchand
-    const handleMerchantClick = (merchantId) => {
-        navigate(`/merchants/${merchantId}`);
-    };
+  const [merchants, setMerchants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Tous');
+  const navigate = useNavigate();
 
-    const fetchMerchants = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('Authentification requise.');
-            }
+  const handleMerchantClick = (merchantId) => {
+    navigate(`/merchants/${merchantId}`);
+  };
 
-            const url = `https://moov-money-backend.onrender.com/api/merchants/all`;
-            const params = {
-                statut: statusFilter === 'Tous' ? '' : statusFilter,
-                search: searchTerm,
-            };
+  const fetchMerchants = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentification requise.');
+      }
 
-            const response = await axios.get(url, {
-                headers: {
-                    'x-auth-token': token,
-                },
-                params: params,
-            });
-            setMerchants(response.data);
-        } catch (err) {
-            console.error(err);
-            setError(err.message || 'Erreur lors du chargement des marchands.');
-        } finally {
-            setLoading(false);
-        }
-    };
+      const url = `https://moov-money-backend.onrender.com/api/merchants/all`;
+      const params = {
+        statut: statusFilter === 'Tous' ? '' : statusFilter,
+        search: searchTerm,
+      };
 
-    useEffect(() => {
-        fetchMerchants();
-    }, [statusFilter, searchTerm]);
+      const response = await axios.get(url, {
+        headers: {
+          'x-auth-token': token,
+        },
+        params: params,
+      });
+      setMerchants(response.data);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Erreur lors du chargement des marchands.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="dashboard-layout">
-            <Sidebar />
-            <div className="main-content">
-                <header className="main-header">
-                    <h2>Gestion des marchands</h2>
-                </header>
+  useEffect(() => {
+    fetchMerchants();
+  }, [statusFilter, searchTerm]);
 
-                <div className="p-4">
-                    <div className="filter-container">
-                         <input
-                            type="text"
-                            placeholder="Rechercher par nom, gérant ou contact..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="status-select"
-                        >
-                            <option value="Tous">Tous les statuts</option>
-                            <option value="en attente">En attente</option>
-                            <option value="validé">Validé</option>
-                            <option value="rejeté">Rejeté</option>
-                        </select>
-                    </div>
-                </div>
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      <main className="main-content">
+        <header className="main-header">
+          <h1>Gestion des marchands</h1>
+        </header>
 
-                {loading ? (
-                    <p>Chargement des marchands...</p>
-                ) : error ? (
-                    <p className="error-message">{error}</p>
-                ) : merchants.length === 0 ? (
-                    <p>Aucun marchand trouvé.</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full bg-white border">
-                            <thead>
-                                <tr>
-                                    <th className="py-2 px-4 border-b">Enseigne</th>
-                                    <th className="py-2 px-4 border-b">Gérant</th>
-                                    <th className="py-2 px-4 border-b">Contact</th>
-                                    <th className="py-2 px-4 border-b">Statut</th>
-                                    <th className="py-2 px-4 border-b">Enrôlé par</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {merchants.map((merchant) => (
-                                    <tr key={merchant._id} onClick={() => handleMerchantClick(merchant._id)} className="cursor-pointer hover:bg-gray-100">
-                                        <td className="py-2 px-4 border-b">{merchant.nom}</td>
-                                        <td className="py-2 px-4 border-b">{merchant.nomGerant}</td>
-                                        <td className="py-2 px-4 border-b">{merchant.contact}</td>
-                                        <td className="py-2 px-4 border-b">{merchant.statut}</td>
-                                        <td className="py-2 px-4 border-b">
-                                            {merchant.agentRecruteurId?.matricule || 'N/A'}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+        <div className="card">
+          <div className="card-header">
+            <div className="filters-container">
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="form-control"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="form-control"
+              >
+                <option value="Tous">Tous les statuts</option>
+                <option value="en attente">En attente</option>
+                <option value="validé">Validé</option>
+                <option value="rejeté">Rejeté</option>
+              </select>
             </div>
+          </div>
+          <div className="card-body">
+            {loading ? (
+              <p>Chargement...</p>
+            ) : error ? (
+              <p className="text-danger">{error}</p>
+            ) : (
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Enseigne</th>
+                      <th>Gérant</th>
+                      <th>Contact</th>
+                      <th>Statut</th>
+                      <th>Enrôlé par</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {merchants.map((merchant) => (
+                      <tr
+                        key={merchant._id}
+                        onClick={() => handleMerchantClick(merchant._id)}
+                        className="merchant-row"
+                      >
+                        <td>{merchant.nom}</td>
+                        <td>{merchant.nomGerant}</td>
+                        <td>{merchant.contact}</td>
+                        <td>
+                          <span className={`status-badge status-${merchant.statut.replace(' ', '_')}`}>
+                            {merchant.statut}
+                          </span>
+                        </td>
+                        <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
-    );
+      </main>
+    </div>
+  );
 };
 
 export default Merchants;

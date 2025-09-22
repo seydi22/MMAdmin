@@ -5,54 +5,49 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faUserShield,faFileAlt,faChartLine, faSignOutAlt,faStore,faUsers} from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
-import logo from '../image/logo.png'
+import logo from '../image/logo.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
     navigate('/login');
   };
 
   return (
     <aside className="sidebar">
-     <div className="logo-section">
-                <img src={logo} alt="Moov Money Logo" className="moov-logo" />
-                <h1 className="brand-name">Moov Money</h1>
-     </div>
-      <nav className="main-nav">
-        <ul>
-          <li>
-            <NavLink to="/" className={({ isActive }) => (isActive ? "active" : "")}>
-              <FontAwesomeIcon icon={faChartLine} /> Dashboard
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/supervisors" className={({ isActive }) => (isActive ? "active" : "")}>
-              <FontAwesomeIcon icon={faUserShield} /> Superviseurs
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/merchants" className={({ isActive }) => (isActive ? "active" : "")}>
-              <FontAwesomeIcon icon={faStore} /> Marchands
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/agents" className={({ isActive }) => (isActive ? "active" : "")}>
-              <FontAwesomeIcon icon={faUsers} /> Agents
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/reports" className={({ isActive }) => (isActive ? "active" : "")}>
-              <FontAwesomeIcon icon={faFileAlt} /> Rapports
-            </NavLink>
-          </li>
-        </ul>
+      <div className="sidebar-header">
+        <img src={logo} alt="Moov Money Logo" className="sidebar-logo" />
+        <h1 className="sidebar-title">Moov Money</h1>
+      </div>
+      <nav className="sidebar-nav">
+        <NavLink to="/" className="nav-link">
+          <FontAwesomeIcon icon={faChartLine} />
+          <span>Dashboard</span>
+        </NavLink>
+        <NavLink to="/supervisors" className="nav-link">
+          <FontAwesomeIcon icon={faUserShield} />
+          <span>Superviseurs</span>
+        </NavLink>
+        <NavLink to="/merchants" className="nav-link">
+          <FontAwesomeIcon icon={faStore} />
+          <span>Marchands</span>
+        </NavLink>
+        <NavLink to="/agents" className="nav-link">
+          <FontAwesomeIcon icon={faUsers} />
+          <span>Agents</span>
+        </NavLink>
+        <NavLink to="/reports" className="nav-link">
+          <FontAwesomeIcon icon={faFileAlt} />
+          <span>Rapports</span>
+        </NavLink>
       </nav>
-      <div className="logout-btn">
-        <button onClick={handleLogout}>
-          <FontAwesomeIcon icon={faSignOutAlt} /> Déconnexion
+      <div className="sidebar-footer">
+        <button onClick={handleLogout} className="btn btn-outline-light w-100">
+          <FontAwesomeIcon icon={faSignOutAlt} />
+          <span>Déconnexion</span>
         </button>
       </div>
     </aside>

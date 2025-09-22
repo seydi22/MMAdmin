@@ -4,31 +4,23 @@ import React from 'react';
 import Sidebar from '../components/Sidebar';
 import MerchantsExport from '../components/MerchantsExport';
 import './Dashboard.css';
+import './Reports.css';
 
 const Reports = () => {
   return (
     <div className="dashboard-layout">
-      {/* Barre latérale */}
       <Sidebar />
-
-      {/* Contenu principal */}
-      <div className="main-content">
+      <main className="main-content">
         <header className="main-header">
-          <h2>📊 Rapports</h2>
+          <h1>Rapports</h1>
         </header>
 
-        <div className="placeholder-content">
-          <p>
-            La page des rapports est en cours de développement. 
-            Vous pouvez néanmoins <strong>exporter la liste des marchands</strong>.
-          </p>
-
-          {/* Zone d’actions pour l’export */}
-          <div className="report-actions" style={{ marginTop: '20px' }}>
+        <div className="card">
+          <div className="card-body">
             <MerchantsExport />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

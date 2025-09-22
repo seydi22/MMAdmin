@@ -10,39 +10,41 @@ const SupervisorsTable = ({ supervisors, onDeleteSupervisor }) => {
   const navigate = useNavigate();
 
   const handleEdit = (id) => {
-    // Redirige vers la page d'édition avec l'ID du superviseur
     navigate(`/supervisors/edit/${id}`);
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce superviseur ?')) {
-      // Appelle la fonction de suppression passée par le parent (Dashboard.js)
       onDeleteSupervisor(id);
     }
   };
 
   return (
-    <div className="table-container">
-      <h3>Liste des superviseurs</h3>
-      <table>
+    <div className="table-responsive">
+      <table className="table">
         <thead>
           <tr>
             <th>Matricule</th>
             <th>Affiliation</th>
-            <th>Actions</th>
+            <th className="text-end">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {supervisors.map(sup => (
-             <tr key={sup._id}>
-              {/* L'erreur est probablement ici : il faut afficher sup.matricule et sup.affiliation */}
+          {supervisors.map((sup) => (
+            <tr key={sup._id}>
               <td>{sup.matricule}</td>
               <td>{sup.affiliation}</td>
-              <td className="actions">
-                <button className="action-btn edit-btn" onClick={() => handleEdit(sup._id)}>
+              <td className="text-end">
+                <button
+                  className="btn btn-sm btn-outline-primary me-2"
+                  onClick={() => handleEdit(sup._id)}
+                >
                   <FontAwesomeIcon icon={faEdit} />
                 </button>
-                <button className="action-btn delete-btn" onClick={() => handleDelete(sup._id)}>
+                <button
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => handleDelete(sup._id)}
+                >
                   <FontAwesomeIcon icon={faTrashAlt} />
                 </button>
               </td>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import AgentsTable from '../components/AgentsTable';
-import './Dashboard.css'; // Réutilisation des styles de layout
+import './Agents.css';
 
 const Agents = () => {
   const [agents, setAgents] = useState([]);
@@ -20,9 +20,8 @@ const Agents = () => {
       return;
     }
     try {
-      // Endpoint pour récupérer tous les agents (y compris les superviseurs)
       const res = await axios.get('https://moov-money-backend.onrender.com/api/agents/all-agents', {
-        headers: { 'x-auth-token': token }
+        headers: { 'x-auth-token': token },
       });
       setAgents(res.data);
     } catch (err) {
@@ -37,19 +36,25 @@ const Agents = () => {
     fetchAgents();
   }, []);
 
-  if (loading) return <div>Chargement...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="loading-container">Chargement...</div>;
+  if (error) return <div className="error-container">{error}</div>;
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <div className="main-content">
+      <main className="main-content">
         <header className="main-header">
-          <h2>Performance des Agents</h2>
+          <h1>Performance des Agents</h1>
         </header>
-
-        <AgentsTable agents={agents} />
-      </div>
+        <div className="card">
+          <div className="card-header">
+            <h3>Liste des Agents</h3>
+          </div>
+          <div className="card-body">
+            <AgentsTable agents={agents} />
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

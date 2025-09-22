@@ -5,9 +5,8 @@ import './AgentsTable.css';
 
 const AgentsTable = ({ agents }) => {
   return (
-    <div className="table-container">
-      <h3>Liste des Agents</h3>
-      <table>
+    <div className="table-responsive">
+      <table className="table">
         <thead>
           <tr>
             <th>Matricule</th>
@@ -18,7 +17,7 @@ const AgentsTable = ({ agents }) => {
           </tr>
         </thead>
         <tbody>
-          {agents.map(agent => (
+          {agents.map((agent) => (
             <tr key={agent._id}>
               <td>{agent.matricule}</td>
               <td>{agent.role}</td>

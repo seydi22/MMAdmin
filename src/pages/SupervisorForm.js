@@ -13,7 +13,7 @@ const SupervisorForm = () => {
     matricule: '',
     motDePasse: '',
     affiliation: '',
-    role: 'superviseur'
+    role: 'superviseur',
   });
 
   useEffect(() => {
@@ -22,13 +22,13 @@ const SupervisorForm = () => {
         const token = localStorage.getItem('token');
         try {
           const res = await axios.get(`https://moov-money-backend.onrender.com/api/agents/${id}`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'x-auth-token': token },
           });
           setFormData({
             matricule: res.data.matricule,
-            motDePasse: '', // Ne jamais pré-remplir le mot de passe pour des raisons de sécurité
+            motDePasse: '',
             affiliation: res.data.affiliation,
-            role: res.data.role
+            role: res.data.role,
           });
         } catch (err) {
           console.error(err);
@@ -38,30 +38,28 @@ const SupervisorForm = () => {
     }
   }, [id]);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
       if (id) {
-        // Logique de mise à jour
         const dataToUpdate = { ...formData };
         if (!dataToUpdate.motDePasse) {
-          delete dataToUpdate.motDePasse; // Supprimer le champ s'il est vide pour ne pas hacher une chaîne vide
+          delete dataToUpdate.motDePasse;
         }
         await axios.put(`https://moov-money-backend.onrender.com/api/agents/${id}`, dataToUpdate, {
-          headers: { 'x-auth-token': token }
+          headers: { 'x-auth-token': token },
         });
       } else {
-        // Logique de création
         await axios.post('https://moov-money-backend.onrender.com/api/agents', formData, {
-          headers: { 'x-auth-token': token }
+          headers: { 'x-auth-token': token },
         });
       }
-      navigate('/');
+      navigate('/supervisors');
     } catch (err) {
       console.error(err);
     }
@@ -70,44 +68,53 @@ const SupervisorForm = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <div className="main-content">
-        <div className="supervisor-form-container">
-          <h2>{id ? 'Modifier un superviseur' : 'Ajouter un nouveau superviseur'}</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Matricule</label>
-              <input 
-                type="text" 
-                name="matricule" 
-                value={formData.matricule} 
-                onChange={handleChange} 
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label>Affiliation</label>
-              <input 
-                type="text" 
-                name="affiliation" 
-                value={formData.affiliation} 
-                onChange={handleChange} 
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label>Mot de passe</label>
-              <input 
-                type="password" 
-                name="motDePasse" 
-                value={formData.motDePasse} 
-                onChange={handleChange} 
-                required={!id} // Requis seulement à la création
-              />
-            </div>
-            <button type="submit" className="submit-btn">{id ? 'Modifier' : 'Ajouter'}</button>
-          </form>
+      <main className="main-content">
+        <header className="main-header">
+          <h1>{id ? 'Modifier un superviseur' : 'Ajouter un superviseur'}</h1>
+        </header>
+        <div className="card">
+          <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Matricule</label>
+                <input
+                  type="text"
+                  name="matricule"
+                  className="form-control"
+                  value={formData.matricule}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Affiliation</label>
+                <input
+                  type="text"
+                  name="affiliation"
+                  className="form-control"
+                  value={formData.affiliation}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Mot de passe</label>
+                <input
+                  type="password"
+                  name="motDePasse"
+                  className="form-control"
+                  value={formData.motDePasse}
+                  onChange={handleChange}
+                  required={!id}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary">
+                {id ? 'Modifier' : 'Ajouter'}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

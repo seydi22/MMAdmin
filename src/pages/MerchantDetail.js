@@ -24,7 +24,7 @@ const MerchantDetail = () => {
     }
     try {
       const res = await axios.get(`https://moov-money-backend.onrender.com/api/merchants/${id}`, {
-        headers: { 'x-auth-token': token }
+        headers: { 'x-auth-token': token },
       });
       setMerchant(res.data);
     } catch (err) {
@@ -43,10 +43,11 @@ const MerchantDetail = () => {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      // Correction de la route pour utiliser POST
-      await axios.post(`https://moov-money-backend.onrender.com/api/merchants/validate/${id}`, {}, {
-        headers: { 'x-auth-token': token }
-      });
+      await axios.post(`https://moov-money-backend.onrender.com/api/merchants/validate/${id}`, {},
+        {
+          headers: { 'x-auth-token': token },
+        }
+      );
       alert('Marchand validé avec succès.');
       navigate('/merchants');
     } catch (err) {
@@ -63,9 +64,8 @@ const MerchantDetail = () => {
       return;
     }
     try {
-      // Correction de la route pour utiliser POST
       await axios.post(`https://moov-money-backend.onrender.com/api/merchants/reject/${id}`, { rejectionReason }, {
-        headers: { 'x-auth-token': token }
+        headers: { 'x-auth-token': token },
       });
       alert('Marchand rejeté avec succès.');
       navigate('/merchants');
@@ -75,105 +75,124 @@ const MerchantDetail = () => {
     }
   };
 
-  if (loading) return <div>Chargement...</div>;
-  if (error) return <div>{error}</div>;
-  if (!merchant) return <div>Aucun marchand trouvé.</div>;
+  if (loading) return <div className="loading-container">Chargement...</div>;
+  if (error) return <div className="error-container">{error}</div>;
+  if (!merchant) return <div className="error-container">Aucun marchand trouvé.</div>;
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <div className="main-content">
-        <div className="merchant-detail-card">
-          <div className="detail-header">
-            <h2>Détails du marchand : {merchant.nom}</h2>
-            <button className="btn-back" onClick={() => navigate('/merchants')}>Retour</button>
-          </div>
-          <div className="detail-row">
-            <p><strong>Statut :</strong> <span className={`status-badge status-${merchant.statut.toLowerCase()}`}>{merchant.statut}</span></p>
-            {/* L'agentRecruteurId peut être un objet ou juste un ID */}
-            <p><strong>Enrôlé par :</strong> {merchant.agentRecruteurId?.matricule || 'N/A'}</p>
-            <p><strong>Date d'enrôlement :</strong> {new Date(merchant.createdAt).toLocaleDateString()}</p>
-          </div>
-          <hr/>
-          <div className="section-title">Informations du gérant</div>
-          <div className="detail-row">
-            <p><strong>Nom du gérant :</strong> {merchant.nomGerant}</p>
-            <p><strong>Prénom du gérant :</strong> {merchant.prenomGerant}</p>
-          </div>
-          <hr/>
-          <div className="section-title">Informations de l'entreprise</div>
-          <div className="detail-row">
-            <p><strong>Secteur :</strong> {merchant.secteur}</p>
-            <p><strong>Type de commerce :</strong> {merchant.typeCommerce}</p>
-            <p><strong>NIF :</strong> {merchant.nif}</p>
-            <p><strong>RC :</strong> {merchant.rc}</p>
-          </div>
-          <p><strong>Adresse :</strong> {merchant.adresse}</p>
-          <div className="detail-row">
-            <p><strong>Contact :</strong> {merchant.contact}</p>
-          </div>
-          <hr/>
-          <div className="section-title">Localisation</div>
-          <div className="detail-row">
-            <p><strong>Région :</strong> {merchant.region}</p>
-            <p><strong>Ville :</strong> {merchant.ville}</p>
-            <p><strong>Commune :</strong> {merchant.commune}</p>
-          </div>
-          <div className="detail-row">
-            <p><strong>Coordonnées GPS :</strong></p>
-            <p><strong>Latitude :</strong> {merchant.latitude}</p>
-            <p><strong>Longitude :</strong> {merchant.longitude}</p>
-          </div>
-          <hr/>
-          <div className="section-title">Documents et Photos</div>
-          <div className="image-gallery">
-            <div className="image-item">
-              <h4>Photo de l'enseigne</h4>
-              <img src={merchant.photoEnseigneUrl} alt="Photo de l'enseigne" />
-            </div>
-            {merchant.pieceIdentite?.type === 'cni' && (
-              <>
-                <div className="image-item">
-                  <h4>CNI Recto</h4>
-                  <img src={merchant.pieceIdentite.cniRectoUrl} alt="CNI Recto" />
-                </div>
-                <div className="image-item">
-                  <h4>CNI Verso</h4>
-                  <img src={merchant.pieceIdentite.cniVersoUrl} alt="CNI Verso" />
-                </div>
-              </>
-            )}
-            {merchant.pieceIdentite?.type === 'passeport' && (
-              <div className="image-item">
-                <h4>Passeport</h4>
-                <img src={merchant.pieceIdentite.passeportUrl} alt="Passeport" />
+      <main className="main-content">
+        <header className="main-header d-flex justify-content-between align-items-center">
+          <h1>Détails du marchand</h1>
+          <button className="btn btn-secondary" onClick={() => navigate('/merchants')}>
+            Retour à la liste
+          </button>
+        </header>
+
+        <div className="row">
+          <div className="col-md-8">
+            <div className="card">
+              <div className="card-header">
+                <h3>{merchant.nom}</h3>
               </div>
-            )}
-          </div>
-          
-          {merchant.statut === 'en attente' && (
-            <div className="action-buttons">
-              <button className="btn-validate" onClick={handleValidation}>Valider</button>
-              <div className="rejection-section">
-                <input
-                  type="text"
-                  placeholder="Raison du rejet (min. 10 caractères)"
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                />
-                <button className="btn-reject" onClick={handleRejection}>Rejeter</button>
+              <div className="card-body">
+                <div className="detail-section">
+                  <h5>Informations générales</h5>
+                  <p><strong>Statut:</strong> <span className={`status-badge status-${merchant.statut.toLowerCase()}`}>{merchant.statut}</span></p>
+                  <p><strong>Enrôlé par:</strong> {merchant.agentRecruteurId?.matricule || 'N/A'}</p>
+                  <p><strong>Date d'enrôlement:</strong> {new Date(merchant.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="detail-section">
+                  <h5>Informations du gérant</h5>
+                  <p><strong>Nom:</strong> {merchant.nomGerant}</p>
+                  <p><strong>Prénom:</strong> {merchant.prenomGerant}</p>
+                </div>
+                <div className="detail-section">
+                  <h5>Informations de l'entreprise</h5>
+                  <p><strong>Secteur:</strong> {merchant.secteur}</p>
+                  <p><strong>Type de commerce:</strong> {merchant.typeCommerce}</p>
+                  <p><strong>NIF:</strong> {merchant.nif}</p>
+                  <p><strong>RC:</strong> {merchant.rc}</p>
+                  <p><strong>Adresse:</strong> {merchant.adresse}</p>
+                  <p><strong>Contact:</strong> {merchant.contact}</p>
+                </div>
+                <div className="detail-section">
+                  <h5>Localisation</h5>
+                  <p><strong>Région:</strong> {merchant.region}</p>
+                  <p><strong>Ville:</strong> {merchant.ville}</p>
+                  <p><strong>Commune:</strong> {merchant.commune}</p>
+                  <p><strong>Coordonnées GPS:</strong> {merchant.latitude}, {merchant.longitude}</p>
+                </div>
               </div>
             </div>
-          )}
-
-          {merchant.statut === 'rejeté' && merchant.rejectionReason && (
-            <p className="rejection-reason-display">
-              <strong>Raison du rejet :</strong> {merchant.rejectionReason}
-            </p>
-          )}
-
+          </div>
+          <div className="col-md-4">
+            <div className="card">
+              <div className="card-header">
+                <h5>Actions</h5>
+              </div>
+              <div className="card-body">
+                {merchant.statut === 'en attente' && (
+                  <div className="action-section">
+                    <button className="btn btn-success w-100 mb-3" onClick={handleValidation}>Valider</button>
+                    <div className="rejection-form">
+                      <textarea
+                        className="form-control mb-2"
+                        placeholder="Raison du rejet..."
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                      ></textarea>
+                      <button className="btn btn-danger w-100" onClick={handleRejection}>Rejeter</button>
+                    </div>
+                  </div>
+                )}
+                {merchant.statut === 'rejeté' && merchant.rejectionReason && (
+                  <div className="rejection-info">
+                    <h6>Raison du rejet</h6>
+                    <p>{merchant.rejectionReason}</p>
+                  </div>
+                )}
+                {merchant.statut === 'validé' && (
+                    <p>Ce marchand a déjà été validé.</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div className="card mt-4">
+            <div className="card-header">
+                <h3>Documents et Photos</h3>
+            </div>
+            <div className="card-body">
+                <div className="image-gallery">
+                    <div className="image-item">
+                        <h6>Photo de l'enseigne</h6>
+                        <img src={merchant.photoEnseigneUrl} alt="Enseigne" />
+                    </div>
+                    {merchant.pieceIdentite?.type === 'cni' && (
+                    <>
+                        <div className="image-item">
+                        <h6>CNI Recto</h6>
+                        <img src={merchant.pieceIdentite.cniRectoUrl} alt="CNI Recto" />
+                        </div>
+                        <div className="image-item">
+                        <h6>CNI Verso</h6>
+                        <img src={merchant.pieceIdentite.cniVersoUrl} alt="CNI Verso" />
+                        </div>
+                    </>
+                    )}
+                    {merchant.pieceIdentite?.type === 'passeport' && (
+                    <div className="image-item">
+                        <h6>Passeport</h6>
+                        <img src={merchant.pieceIdentite.passeportUrl} alt="Passeport" />
+                    </div>
+                    )}
+                </div>
+            </div>
+        </div>
+      </main>
     </div>
   );
 };
