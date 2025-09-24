@@ -13,6 +13,7 @@ import Merchants from './pages/Merchants';
 import Agents from './pages/Agents';
 import MerchantDetail from './pages/MerchantDetail'; // Importez le composant de détail du marchand
 import Reports from './pages/Reports'; // 👈 NOUVEAU : Importation du composant Reports
+import AdminValidation from './pages/AdminValidation'; // Import the new page
 
 /**
  * Composant principal de l'application gérant toutes les routes.
@@ -82,6 +83,7 @@ const AppContent = () => {
       <Route path="/supervisors/new" element={<PrivateRoute roleRequired="admin"><SupervisorForm /></PrivateRoute>} />
       <Route path="/supervisors/edit/:id" element={<PrivateRoute roleRequired="admin"><SupervisorForm /></PrivateRoute>} />
       <Route path="/merchants" element={<PrivateRoute roleRequired="admin"><Merchants /></PrivateRoute>} />
+      <Route path="/merchants/pending-validation" element={<PrivateRoute roleRequired="admin"><AdminValidation /></PrivateRoute>} />
       <Route path="/agents" element={<PrivateRoute roleRequired="admin"><Agents /></PrivateRoute>} />
       <Route path="/merchants/:id" element={<PrivateRoute roleRequired="admin"><MerchantDetail /></PrivateRoute>} />
       

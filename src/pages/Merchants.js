@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import MerchantsExport from '../components/MerchantsExport'; // Import the export component
 import './Dashboard.css'; // S'assurer que les styles du tableau de bord sont inclus
 import './Merchants.css';
 
@@ -78,6 +79,7 @@ const Merchants = () => {
               >
                 <option value="Tous">Tous les statuts</option>
                 <option value="en attente">En attente</option>
+                <option value="validé_par_superviseur">Validé par superviseur</option>
                 <option value="validé">Validé</option>
                 <option value="rejeté">Rejeté</option>
               </select>
@@ -122,6 +124,11 @@ const Merchants = () => {
                 </table>
               </div>
             )}
+          </div>
+        </div>
+        <div className="card mt-4">
+          <div className="card-body">
+            <MerchantsExport />
           </div>
         </div>
       </main>

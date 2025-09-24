@@ -47,10 +47,12 @@ tbody tr:hover {
   background-color: #e74c3c;
 }
 
+.status-validé_par_superviseur {
+  background-color: #9b59b6; /* A distinct purple color */
+}
+
 .actions {
   display: flex;
-  gap: 10px;
-}
 
 .action-btn {
   background: none;

@@ -7,18 +7,35 @@ const MerchantsExport = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
-  const handleExport = async () => {
+  const handleExport = async (exportType) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Authentification requise pour l\'exportation.');
+        // Correction ici : utilisation des backticks pour la chaîne
+        throw new Error(`Authentification requise pour l'exportation.`);
       }
 
-      const response = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/export', {
+      let url = exportType === 'operators' 
+        ? 'https://backend-vercel-one-kappa.vercel.app/api/merchants/export-operators' 
+        : 'https://backend-vercel-one-kappa.vercel.app/api/merchants/export';
+
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', new Date(startDate).toISOString());
+      if (endDate) params.append('endDate', new Date(endDate).toISOString());
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const fileName = exportType === 'operators' ? 'operators_export.xlsx' : 'merchants_export.xlsx';
+
+      const response = await axios.get(url, {
         headers: {
           'x-auth-token': token,
         },
@@ -29,7 +46,7 @@ const MerchantsExport = () => {
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.setAttribute('download', 'merchants_export.xlsx');
+      link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -37,13 +54,13 @@ const MerchantsExport = () => {
 
       setSuccess(true);
     } catch (err) {
-      console.error('Erreur lors de l\'exportation :', err.response || err);
+      console.error("Erreur lors de l'exportation :", err.response || err);
       if (err.response && err.response.status === 404) {
-        setError('Aucun marchand trouvé pour l\'exportation.');
+        setError("Aucune donnée trouvée pour l'exportation.");
       } else if (err.response && err.response.data && err.response.data.msg) {
         setError(err.response.data.msg);
       } else {
-        setError('Une erreur est survenue lors de l\'exportation.');
+        setError("Une erreur est survenue lors de l'exportation.");
       }
       setSuccess(false);
     } finally {
@@ -53,17 +70,50 @@ const MerchantsExport = () => {
 
   return (
     <div className="export-container">
-      <h3 className="export-title">Exporter les marchands</h3>
+      <h3 className="export-title">Exporter les Données</h3>
       <p className="export-description">
-        Cliquez sur le bouton ci-dessous pour télécharger un fichier Excel contenant la liste complète de tous les marchands enregistrés.
+        Téléchargez des rapports Excel pour les marchands ou leurs opérateurs (seuls les marchands validés sont inclus).
       </p>
-      <button
-        onClick={handleExport}
-        className="btn btn-primary"
-        disabled={loading}
-      >
-        {loading ? 'Exportation en cours...' : 'Télécharger le rapport Excel'}
-      </button>
+
+      <div className="filter-container">
+        <div className="form-group">
+          <label htmlFor="startDate">Date de début de validation</label>
+          <input
+            type="datetime-local"
+            id="startDate"
+            className="form-control"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="endDate">Date de fin de validation</label>
+          <input
+            type="datetime-local"
+            id="endDate"
+            className="form-control"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="export-buttons">
+        <button
+          onClick={() => handleExport('merchants')}
+          className="btn btn-primary"
+          disabled={loading}
+        >
+          {loading ? 'Exportation...' : 'Exporter les Marchands'}
+        </button>
+        <button
+          onClick={() => handleExport('operators')}
+          className="btn btn-secondary"
+          disabled={loading}
+        >
+          {loading ? 'Exportation...' : 'Exporter les Opérateurs'}
+        </button>
+      </div>
 
       {success && (
         <div className="alert alert-success mt-3">
@@ -78,6 +128,5 @@ const MerchantsExport = () => {
     </div>
   );
 };
-
 
 export default MerchantsExport;

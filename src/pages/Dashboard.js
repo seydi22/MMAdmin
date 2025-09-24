@@ -4,20 +4,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserShield, faStore, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faUserShield, faStore, faUsers, faHourglassHalf } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/Sidebar';
 import StatsCards from '../components/StatsCards';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const [supervisors, setSupervisors] = useState([]);
-  const [merchantsCount, setMerchantsCount] = useState(0);
-  const [agentsCount, setAgentsCount] = useState(0);
+  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchStats = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setError('Veuillez vous authentifier.');
@@ -30,15 +28,33 @@ const Dashboard = () => {
     };
 
     try {
-      const [supervisorsRes, merchantsRes, agentsRes] = await Promise.all([
+      const [supervisorsRes, agentsRes, merchantStatsRes] = await Promise.all([
         axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', config),
-        axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/all', config),
         axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', config),
+        axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/dashboard-stats', config),
       ]);
 
-      setSupervisors(supervisorsRes.data);
-      setMerchantsCount(merchantsRes.data.length);
-      setAgentsCount(agentsRes.data.length);
+      const merchantStats = merchantStatsRes.data;
+
+      if (merchantStats.totalAgents !== undefined) {
+        // Admin role
+        setStats({
+          totalSupervisors: supervisorsRes.data.length,
+          totalAgents: merchantStats.totalAgents,
+          totalMerchants: merchantStats.stats.total,
+          validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
+        });
+      } else {
+        // Supervisor role
+        const totalMerchants = Object.values(merchantStats.stats).reduce((sum, count) => sum + count, 0);
+        setStats({
+          totalSupervisors: supervisorsRes.data.length,
+          totalAgents: agentsRes.data.length, // Fallback to the old way
+          totalMerchants: totalMerchants,
+          validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
+        });
+      }
+
     } catch (err) {
       setError('Erreur lors du chargement des données.');
       console.error(err);
@@ -48,7 +64,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchStats();
   }, []);
 
   if (loading) return <div className="loading-container">Chargement...</div>;
@@ -66,34 +82,35 @@ const Dashboard = () => {
         <div className="stats-grid">
           <StatsCards
             title="Superviseurs"
-            value={supervisors.length}
+            value={stats?.totalSupervisors || 0}
             icon={<FontAwesomeIcon icon={faUserShield} />}
           />
           <StatsCards
             title="Marchands"
-            value={merchantsCount}
+            value={stats?.totalMerchants || 0}
             icon={<FontAwesomeIcon icon={faStore} />}
           />
           <StatsCards
             title="Agents"
-            value={agentsCount}
+            value={stats?.totalAgents || 0}
             icon={<FontAwesomeIcon icon={faUsers} />}
+          />
+          <StatsCards
+            title="Validé par superviseur"
+            value={stats?.validatedBySupervisor || 0} // Reverted to camelCase
+            icon={<FontAwesomeIcon icon={faHourglassHalf} />}
           />
         </div>
 
         <div className="card mt-4">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h3>Liste des superviseurs</h3>
+            <h3>Raccourcis</h3>
             <button
               className="btn btn-primary"
-              onClick={() => navigate('/supervisors/new')}
+              onClick={() => navigate('/merchants/pending-validation')}
             >
-              Ajouter un superviseur
+              Voir les marchands à valider
             </button>
-          </div>
-          <div className="card-body">
-            {/* Supervisor table will go here */}
-            <p>Le tableau des superviseurs sera affiché ici.</p>
           </div>
         </div>
       </main>
