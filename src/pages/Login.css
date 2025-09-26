@@ -10,7 +10,7 @@
 
 .login-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px; /* Reduced max-width */
   padding: var(--spacing-lg);
 }
 
@@ -22,6 +22,30 @@
 .card {
   border: none;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  top: 70%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .alert-danger {
@@ -36,4 +60,8 @@
 
 .w-100 {
   width: 100%;
+}
+
+.text-muted {
+  color: #6c757d !important;
 }

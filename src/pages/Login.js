@@ -12,6 +12,7 @@ const Login = () => {
     motDePasse: '',
   });
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = e => {
@@ -34,6 +35,10 @@ const Login = () => {
       console.error(err.response.data.msg);
       setError(err.response.data.msg || 'Une erreur est survenue.');
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -62,16 +67,23 @@ const Login = () => {
                   required
                 />
               </div>
-              <div className="form-group">
+              <div className="form-group password-container">
                 <label className="form-label">Mot de passe</label>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="motDePasse"
                   className="form-control"
                   value={formData.motDePasse}
                   onChange={handleChange}
                   required
                 />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary password-toggle-btn"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? 'Cacher' : 'Afficher'}
+                </button>
               </div>
               <button type="submit" className="btn btn-primary w-100">
                 Se connecter
@@ -79,6 +91,7 @@ const Login = () => {
             </form>
           </div>
         </div>
+        <p className="text-center mt-4 text-muted">© Moov Money 2025</p>
       </div>
     </div>
   );
