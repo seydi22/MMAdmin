@@ -36,6 +36,11 @@
   color: var(--color-text-dark);
 }
 
+.status-validé_par_superviseur {
+  background-color: var(--color-warning);
+  color: var(--color-text-dark);
+}
+
 .text-danger {
     color: var(--color-danger);
 }
