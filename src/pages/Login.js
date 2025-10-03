@@ -1,8 +1,7 @@
-// src/pages/Login.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './Login.css';
 import logo from '../image/logo.png'; // Import the logo
 
@@ -43,32 +42,34 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <div className="login-container">
-        <div className="text-center mb-4">
-          <img src={logo} alt="Company Logo" className="login-logo" />
-        </div>
-        <div className="card">
-          <div className="card-body">
-            <h3 className="text-center mb-4">Connexion</h3>
-            {error && (
-              <div className="alert alert-danger" role="alert">
-                {error}
-              </div>
-            )}
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label">Matricule</label>
-                <input
-                  type="text"
-                  name="matricule"
-                  className="form-control"
-                  value={formData.matricule}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group password-container">
-                <label className="form-label">Mot de passe</label>
+      <div className="login-branding">
+        <img src={logo} alt="Company Logo" className="login-logo" />
+        <h1 className="branding-title">Bienvenue</h1>
+        <p className="branding-subtitle">Connectez-vous pour accéder à votre tableau de bord</p>
+      </div>
+      <div className="login-form-container">
+        <div className="login-form">
+          <h3 className="form-title">Connexion</h3>
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Matricule</label>
+              <input
+                type="text"
+                name="matricule"
+                className="form-control"
+                value={formData.matricule}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group password-container">
+              <label className="form-label">Mot de passe</label>
+              <div className="password-input-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="motDePasse"
@@ -82,20 +83,19 @@ const Login = () => {
                   className="btn btn-outline-secondary password-toggle-btn"
                   onClick={togglePasswordVisibility}
                 >
-                  {showPassword ? 'Cacher' : 'Afficher'}
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              <button type="submit" className="btn btn-primary w-100">
-                Se connecter
-              </button>
-            </form>
-          </div>
+            </div>
+            <button type="submit" className="btn btn-primary w-100 login-btn">
+              Se connecter
+            </button>
+          </form>
+          <p className="login-footer">© Moov Money 2025</p>
         </div>
-        <p className="text-center mt-4 text-muted">© Moov Money 2025</p>
       </div>
     </div>
   );
 };
-
 
 export default Login;
