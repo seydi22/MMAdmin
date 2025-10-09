@@ -99,6 +99,22 @@ const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
       <div className="space-y-4 text-gray-700 mb-8">
         <p><span className="font-semibold">Type de commerçant :</span> {merchant.typeCommercant}</p>
         <p><span className="font-semibold">Gérant :</span> {merchant.nomGerant}</p>
+        <div>
+          <p><span className="font-semibold">Opérateurs :</span></p>
+          {merchant.operators && merchant.operators.length > 0 ? (
+            <div style={{ paddingLeft: '1rem' }}>
+              {merchant.operators.map((op, index) => (
+                <div key={index} className="operateur-item mb-2">
+                  <p><strong>Opérateur {index + 1}:</strong></p>
+                  <p style={{ paddingLeft: '1rem' }}><strong>Nom:</strong> {op.prenom} {op.nom}</p>
+                  <p style={{ paddingLeft: '1rem' }}><strong>Téléphone:</strong> {op.telephone}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ paddingLeft: '1rem' }}>N/A</p>
+          )}
+        </div>
         <p><span className="font-semibold">Contact :</span> {merchant.contact}</p>
         <p><span className="font-semibold">Emplacement :</span> {merchant.emplacement}</p>
         <p><span className="font-semibold">Statut :</span> <span className={`font-semibold ${
