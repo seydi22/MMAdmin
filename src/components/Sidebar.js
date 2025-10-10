@@ -3,12 +3,13 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faUserShield,faFileAlt,faChartLine, faSignOutAlt,faStore,faUsers, faCheckDouble} from '@fortawesome/free-solid-svg-icons';
+import {faUserShield,faFileAlt,faChartLine, faSignOutAlt,faStore,faUsers, faCheckDouble, faChartBar} from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 import logo from '../image/logo.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('userRole'); // Récupérer le rôle
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -27,26 +28,48 @@ const Sidebar = () => {
           <FontAwesomeIcon icon={faChartLine} />
           <span>Dashboard</span>
         </NavLink>
-        <NavLink to="/supervisors" className="nav-link">
-          <FontAwesomeIcon icon={faUserShield} />
-          <span>Superviseurs</span>
-        </NavLink>
-        <NavLink to="/merchants" className="nav-link">
-          <FontAwesomeIcon icon={faStore} />
-          <span>Marchands</span>
-        </NavLink>
-        <NavLink to="/merchants/pending-validation" className="nav-link">
-          <FontAwesomeIcon icon={faCheckDouble} />
-          <span>Validation Marchands</span>
-        </NavLink>
-        <NavLink to="/agents" className="nav-link">
-          <FontAwesomeIcon icon={faUsers} />
-          <span>Agents</span>
-        </NavLink>
-        <NavLink to="/reports" className="nav-link">
-          <FontAwesomeIcon icon={faFileAlt} />
-          <span>Rapports</span>
-        </NavLink>
+
+        {userRole === 'admin' && (
+          <>
+            <NavLink to="/supervisors" className="nav-link">
+              <FontAwesomeIcon icon={faUserShield} />
+              <span>Superviseurs</span>
+            </NavLink>
+            <NavLink to="/merchants" className="nav-link">
+              <FontAwesomeIcon icon={faStore} />
+              <span>Marchands</span>
+            </NavLink>
+            <NavLink to="/merchants/pending-validation" className="nav-link">
+              <FontAwesomeIcon icon={faCheckDouble} />
+              <span>Validation Marchands</span>
+            </NavLink>
+            <NavLink to="/agents" className="nav-link">
+              <FontAwesomeIcon icon={faUsers} />
+              <span>Agents</span>
+            </NavLink>
+            <NavLink to="/reports" className="nav-link">
+              <FontAwesomeIcon icon={faFileAlt} />
+              <span>Rapports</span>
+            </NavLink>
+            <NavLink to="/performance-superviseurs" className="nav-link">
+              <FontAwesomeIcon icon={faChartBar} />
+              <span>Performance</span>
+            </NavLink>
+          </>
+        )}
+
+        {userRole === 'superviseur' && (
+          <>
+            <NavLink to="/merchants/pending-validation" className="nav-link">
+              <FontAwesomeIcon icon={faCheckDouble} />
+              <span>Validation Marchands</span>
+            </NavLink>
+            <NavLink to="/performance-superviseurs" className="nav-link">
+              <FontAwesomeIcon icon={faChartBar} />
+              <span>Performance</span>
+            </NavLink>
+          </>
+        )}
       </nav>
       <div className="sidebar-footer">
         <button onClick={handleLogout} className="btn btn-outline-light w-100">

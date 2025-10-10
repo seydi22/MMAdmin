@@ -1,0 +1,43 @@
+/* Styles pour le tableau de performance des superviseurs */
+.performance-table-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.performance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.performance-table th,
+.performance-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.performance-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.performance-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.performance-table tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+.performance-table .validation-count {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #007bff;
+    text-align: center;
+}

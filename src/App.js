@@ -14,6 +14,7 @@ import Agents from './pages/Agents';
 import MerchantDetail from './pages/MerchantDetail'; // Importez le composant de détail du marchand
 import Reports from './pages/Reports'; // 👈 NOUVEAU : Importation du composant Reports
 import AdminValidation from './pages/AdminValidation'; // Import the new page
+import SupervisorPerformance from './pages/SupervisorPerformance';
 
 /**
  * Composant principal de l'application gérant toutes les routes.
@@ -89,6 +90,16 @@ const AppContent = () => {
       
       {/* 👈 NOUVEAU : Route pour la page des rapports */}
       <Route path="/reports" element={<PrivateRoute roleRequired="admin"><Reports /></PrivateRoute>} />
+
+      {/* Route pour la performance des superviseurs */}
+      <Route 
+        path="/performance-superviseurs"
+        element={
+          <PrivateRoute rolesRequired={['admin', 'superviseur']}>
+            <SupervisorPerformance />
+          </PrivateRoute>
+        }
+      />
 
     </Routes>
   );
