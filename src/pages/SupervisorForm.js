@@ -15,6 +15,7 @@ const SupervisorForm = () => {
     affiliation: '',
     role: 'superviseur',
   });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -79,6 +80,7 @@ const SupervisorForm = () => {
         </header>
         <div className="card">
           <div className="card-body">
+            {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Matricule</label>
