@@ -61,7 +61,12 @@ const SupervisorForm = () => {
       }
       navigate('/supervisors');
     } catch (err) {
-      console.error(err);
+      if (err.response && err.response.data && err.response.data.msg) {
+        setError(err.response.data.msg);
+      } else {
+        console.error('An unexpected error occurred:', err);
+        setError('An unexpected error occurred. Please try again.');
+      }
     }
   };
 

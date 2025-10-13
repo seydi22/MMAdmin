@@ -15,6 +15,7 @@ import MerchantDetail from './pages/MerchantDetail'; // Importez le composant de
 import Reports from './pages/Reports'; // 👈 NOUVEAU : Importation du composant Reports
 import AdminValidation from './pages/AdminValidation'; // Import the new page
 import SupervisorPerformance from './pages/SupervisorPerformance';
+import AdminLogs from './pages/AdminLogs'; // Import the new page
 
 /**
  * Composant principal de l'application gérant toutes les routes.
@@ -100,6 +101,9 @@ const AppContent = () => {
           </PrivateRoute>
         }
       />
+
+      {/* Route pour l'historique des logs */}
+      <Route path="/admin/logs" element={<PrivateRoute roleRequired="admin"><AdminLogs /></PrivateRoute>} />
 
     </Routes>
   );

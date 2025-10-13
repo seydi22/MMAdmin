@@ -31,8 +31,13 @@ const Login = () => {
         navigate('/');
       }
     } catch (err) {
-      console.error(err.response.data.msg);
-      setError(err.response.data.msg || 'Une erreur est survenue.');
+      if (err.response && err.response.data && err.response.data.msg) {
+        console.error(err.response.data.msg);
+        setError(err.response.data.msg);
+      } else {
+        console.error('An unexpected error occurred:', err);
+        setError('An unexpected error occurred. Please try again.');
+      }
     }
   };
 

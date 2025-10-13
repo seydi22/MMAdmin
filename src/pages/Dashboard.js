@@ -7,63 +7,69 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserShield, faStore, faUsers, faHourglassHalf } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/Sidebar';
 import StatsCards from '../components/StatsCards';
+import RecentActivityLogs from '../components/RecentActivityLogs'; // Import the new component
 import './Dashboard.css';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(null); // Add userRole state
   const navigate = useNavigate();
 
-  const fetchStats = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Veuillez vous authentifier.');
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    // Get user role from localStorage
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
 
-    const config = {
-      headers: { 'x-auth-token': token },
-    };
-
-    try {
-      const [supervisorsRes, agentsRes, merchantStatsRes] = await Promise.all([
-        axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', config),
-        axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', config),
-        axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/dashboard-stats', config),
-      ]);
-
-      const merchantStats = merchantStatsRes.data;
-
-      if (merchantStats.totalAgents !== undefined) {
-        // Admin role
-        setStats({
-          totalSupervisors: supervisorsRes.data.length,
-          totalAgents: merchantStats.totalAgents,
-          totalMerchants: merchantStats.stats.total,
-          validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
-        });
-      } else {
-        // Supervisor role
-        const totalMerchants = Object.values(merchantStats.stats).reduce((sum, count) => sum + count, 0);
-        setStats({
-          totalSupervisors: supervisorsRes.data.length,
-          totalAgents: agentsRes.data.length, // Fallback to the old way
-          totalMerchants: totalMerchants,
-          validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
-        });
+    const fetchStats = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Veuillez vous authentifier.');
+        setLoading(false);
+        return;
       }
 
-    } catch (err) {
-      setError('Erreur lors du chargement des données.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const config = {
+        headers: { 'x-auth-token': token },
+      };
 
-  useEffect(() => {
+      try {
+        const [supervisorsRes, agentsRes, merchantStatsRes] = await Promise.all([
+          axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', config),
+          axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', config),
+          axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/dashboard-stats', config),
+        ]);
+
+        const merchantStats = merchantStatsRes.data;
+
+        if (merchantStats.totalAgents !== undefined) {
+          // Admin role
+          setStats({
+            totalSupervisors: supervisorsRes.data.length,
+            totalAgents: merchantStats.totalAgents,
+            totalMerchants: merchantStats.stats.total,
+            validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
+          });
+        } else {
+          // Supervisor role
+          const totalMerchants = Object.values(merchantStats.stats).reduce((sum, count) => sum + count, 0);
+          setStats({
+            totalSupervisors: supervisorsRes.data.length,
+            totalAgents: agentsRes.data.length, // Fallback to the old way
+            totalMerchants: totalMerchants,
+            validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
+          });
+        }
+
+      } catch (err) {
+        setError('Erreur lors du chargement des données.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchStats();
   }, []);
 
@@ -101,6 +107,8 @@ const Dashboard = () => {
             icon={<FontAwesomeIcon icon={faHourglassHalf} />}
           />
         </div>
+
+        {userRole === 'admin' && <RecentActivityLogs />}
 
         <div className="card mt-4">
           <div className="card-header d-flex justify-content-between align-items-center">
