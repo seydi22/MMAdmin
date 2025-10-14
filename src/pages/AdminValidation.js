@@ -141,7 +141,7 @@ const AdminValidation = () => {
       </main>
 
       {showModal && (
-        <Modal onClose={() => setShowModal(false)}>
+        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
           <h2>Raison du Rejet</h2>
           <textarea
             value={rejectionReason}
