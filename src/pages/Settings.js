@@ -1,7 +1,41 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import './Settings.css';
+import Sidebar from '../components/Sidebar';
 
-// ... (rest of the component)
+const Settings = () => {
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setMessage('');
+        setError('');
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            setError("Tous les champs sont obligatoires.");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setError("Le nouveau mot de passe doit comporter au moins 6 caractères.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setError("Les champs “Nouveau mot de passe” et “Confirmer le mot de passe” doivent correspondre.");
+            return;
+        }
+
+        setLoading(true);
 
         try {
             const response = await api.put(
@@ -22,7 +56,7 @@ import api from '../services/api';
             if (err.response) {
                 if (err.response.status === 500) {
                     setError("Erreur du serveur, veuillez réessayer.");
-                } else {
+                } else if (err.response.status !== 401) { // 401 is handled globally
                     setError(err.response.data.msg || "Une erreur s'est produite.");
                 }
             } else {

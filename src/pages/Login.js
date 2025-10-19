@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import api from '../services/api';
 import './Login.css';
 import logo from '../image/logo.png'; // Import the logo
