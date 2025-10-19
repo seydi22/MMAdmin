@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaUserPlus, FaEdit, FaTrash, FaSpinner, FaInfoCircle, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import Modal from '../components/Modal/Modal'; // Assurez-vous d'avoir un composant Modal générique
+import API_BASE_URL from '../config/apiConfig';
 
 const SupervisorAgentManagement = () => {
   const [agents, setAgents] = useState([]);
@@ -17,7 +18,7 @@ const SupervisorAgentManagement = () => {
   const [affiliation, setAffiliation] = useState('');
   const [role, setRole] = useState('agent');
 
-  const API_URL = 'https://backend-vercel-one-kappa.vercel.app/api/agents';
+  const API_URL = `${API_BASE_URL}/api/agents`;
 
   const fetchAgents = async () => {
     setIsLoading(true);

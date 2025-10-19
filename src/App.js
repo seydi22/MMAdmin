@@ -110,6 +110,7 @@ const AppContent = () => {
 };
 
 function App() {
+  console.log('URL d\'API utilisée au build :', process.env.REACT_APP_API_URL);
   return (
     <Router>
       <AppContent />

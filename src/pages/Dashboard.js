@@ -1,5 +1,3 @@
-// src/pages/Dashboard.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +6,7 @@ import { faUserShield, faStore, faUsers, faHourglassHalf } from '@fortawesome/fr
 import Sidebar from '../components/Sidebar';
 import StatsCards from '../components/StatsCards';
 import RecentActivityLogs from '../components/RecentActivityLogs'; // Import the new component
+import API_BASE_URL from '../config/apiConfig';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -36,9 +35,9 @@ const Dashboard = () => {
 
       try {
         const [supervisorsRes, agentsRes, merchantStatsRes] = await Promise.all([
-          axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', config),
-          axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', config),
-          axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/dashboard-stats', config),
+          axios.get(`${API_BASE_URL}/api/agents/all-supervisors`, config),
+          axios.get(`${API_BASE_URL}/api/agents/all-agents`, config),
+          axios.get(`${API_BASE_URL}/api/merchants/dashboard-stats`, config),
         ]);
 
         const merchantStats = merchantStatsRes.data;

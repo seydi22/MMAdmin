@@ -1,9 +1,8 @@
-// src/pages/Agents.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import AgentsTable from '../components/AgentsTable';
+import API_BASE_URL from '../config/apiConfig';
 import './Agents.css';
 
 const Agents = () => {
@@ -20,7 +19,7 @@ const Agents = () => {
       return;
     }
     try {
-      const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-agents', {
+      const res = await axios.get(`${API_BASE_URL}/api/agents/all-agents`, {
         headers: { 'x-auth-token': token },
       });
       setAgents(res.data);

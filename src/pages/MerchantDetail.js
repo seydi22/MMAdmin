@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
+import API_BASE_URL from '../config/apiConfig';
 import './MerchantDetail.css';
 import { FaUser, FaBuilding, FaFileAlt, FaArrowLeft, FaMapMarkerAlt } from 'react-icons/fa';
 import { BiSupport } from 'react-icons/bi';
@@ -24,7 +25,7 @@ const MerchantDetail = () => {
         return;
       }
       try {
-        const res = await axios.get(`https://backend-vercel-one-kappa.vercel.app/api/merchants/${id}`, {
+        const res = await axios.get(`${API_BASE_URL}/api/merchants/${id}`, {
           headers: { 'x-auth-token': token },
         });
         setMerchant(res.data);

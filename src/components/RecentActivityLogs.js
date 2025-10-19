@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import API_BASE_URL from '../config/apiConfig';
 import './RecentActivityLogs.css';
 
 // Helper function to format the date
@@ -37,7 +38,7 @@ const RecentActivityLogs = () => {
       };
 
       try {
-        const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/logs', config);
+        const res = await axios.get(`${API_BASE_URL}/api/logs`, config);
         setLogs(res.data.slice(0, 5));
       } catch (err) {
         setError('Erreur lors du chargement des logs.');

@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal/Modal'; // Assuming you have a Modal component
+import API_BASE_URL from '../config/apiConfig';
 import './Merchants.css';
 
 const AdminValidation = () => {
@@ -26,7 +27,7 @@ const AdminValidation = () => {
         throw new Error('Authentification requise.');
       }
 
-      const url = `https://backend-vercel-one-kappa.vercel.app/api/merchants/pending-admin-validation`;
+      const url = `${API_BASE_URL}/api/merchants/pending-admin-validation`;
       const response = await axios.get(url, {
         headers: {
           'x-auth-token': token,
@@ -48,7 +49,7 @@ const AdminValidation = () => {
   const handleValidate = async (merchantId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`https://backend-vercel-one-kappa.vercel.app/api/merchants/admin-validate/${merchantId}`, {}, {
+      await axios.post(`${API_BASE_URL}/api/merchants/admin-validate/${merchantId}`, {}, {
         headers: { 'x-auth-token': token },
       });
       fetchPendingMerchants(); // Refresh the list
@@ -69,7 +70,7 @@ const AdminValidation = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`https://backend-vercel-one-kappa.vercel.app/api/merchants/admin-reject/${selectedMerchantId}`, 
+      await axios.post(`${API_BASE_URL}/api/merchants/admin-reject/${selectedMerchantId}`, 
         { rejectionReason }, 
         {
           headers: { 'x-auth-token': token },

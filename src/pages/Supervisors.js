@@ -1,10 +1,9 @@
-// src/pages/Supervisors.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import SupervisorsTable from '../components/SupervisorsTable';
+import API_BASE_URL from '../config/apiConfig';
 import './Dashboard.css'; // On réutilise les styles pour le layout
 import './Supervisors.css'; // Changed from Dashboard.css
 
@@ -23,7 +22,7 @@ const Supervisors = () => {
       return;
     }
     try {
-      const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/agents/all-supervisors', {
+      const res = await axios.get(`${API_BASE_URL}/api/agents/all-supervisors`, {
         headers: { 'x-auth-token': token },
       });
       setSupervisors(res.data);
@@ -42,7 +41,7 @@ const Supervisors = () => {
   const handleDeleteSupervisor = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`https://backend-vercel-one-kappa.vercel.app/api/agents/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/agents/${id}`, {
         headers: { 'x-auth-token': token },
       });
       setSupervisors(supervisors.filter((sup) => sup._id !== id));

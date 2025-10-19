@@ -1,10 +1,9 @@
-// src/pages/Merchants.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MerchantsExport from '../components/MerchantsExport'; // Import the export component
+import API_BASE_URL from '../config/apiConfig';
 import './Dashboard.css'; // S'assurer que les styles du tableau de bord sont inclus
 import './Merchants.css';
 
@@ -29,7 +28,7 @@ const Merchants = () => {
         throw new Error('Authentification requise.');
       }
 
-      const url = `https://backend-vercel-one-kappa.vercel.app/api/merchants/all`;
+      const url = `${API_BASE_URL}/api/merchants/all`;
       const params = {
         statut: statusFilter === 'Tous' ? '' : statusFilter,
         search: searchTerm,

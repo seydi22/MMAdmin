@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import SupervisorPerformanceTable from '../components/SupervisorPerformanceTable';
+import API_BASE_URL from '../config/apiConfig';
 import './SupervisorPerformance.css';
 
 const SupervisorPerformance = () => {
@@ -12,8 +13,7 @@ const SupervisorPerformance = () => {
     useEffect(() => {
         const fetchPerformanceData = async () => {
             try {
-                // Remplacer par la bonne URL d'API si nécessaire
-                const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/merchants/supervisors/performance', {
+                const res = await axios.get(`${API_BASE_URL}/api/merchants/supervisors/performance`, {
                     headers: {
                         'x-auth-token': localStorage.getItem('token'),
                     },

@@ -1,8 +1,7 @@
-// src/pages/SupervisorForm.js
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../config/apiConfig';
 import './SupervisorForm.css';
 import Sidebar from '../components/Sidebar';
 
@@ -22,7 +21,7 @@ const SupervisorForm = () => {
       const fetchSupervisor = async () => {
         const token = localStorage.getItem('token');
         try {
-          const res = await axios.get(`https://backend-vercel-one-kappa.vercel.app/api/agents/${id}`, {
+          const res = await axios.get(`${API_BASE_URL}/api/agents/${id}`, {
             headers: { 'x-auth-token': token },
           });
           setFormData({
@@ -52,11 +51,11 @@ const SupervisorForm = () => {
         if (!dataToUpdate.motDePasse) {
           delete dataToUpdate.motDePasse;
         }
-        await axios.put(`https://backend-vercel-one-kappa.vercel.app/api/agents/${id}`, dataToUpdate, {
+        await axios.put(`${API_BASE_URL}/api/agents/${id}`, dataToUpdate, {
           headers: { 'x-auth-token': token },
         });
       } else {
-        await axios.post('https://backend-vercel-one-kappa.vercel.app/api/agents', formData, {
+        await axios.post(`${API_BASE_URL}/api/agents`, formData, {
           headers: { 'x-auth-token': token },
         });
       }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
+import API_BASE_URL from '../config/apiConfig';
 import './AdminLogs.css';
 
 const AdminLogs = () => {
@@ -25,7 +26,7 @@ const AdminLogs = () => {
       };
 
       try {
-        const res = await axios.get('https://backend-vercel-one-kappa.vercel.app/api/logs', config);
+        const res = await axios.get(`${API_BASE_URL}/api/logs`, config);
         setLogs(res.data);
       } catch (err) {
         setError('Erreur lors du chargement des logs.');

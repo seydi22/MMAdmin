@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import API_BASE_URL from '../config/apiConfig';
 import './Login.css';
 import logo from '../image/logo.png'; // Import the logo
 
@@ -21,7 +22,7 @@ const Login = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://backend-vercel-one-kappa.vercel.app/api/agents/login', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/agents/login`, formData);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userRole', res.data.agent.role);
 

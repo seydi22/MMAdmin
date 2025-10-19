@@ -1,6 +1,7 @@
 // src/components/MerchantsExport.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config/apiConfig'; // Importer la constante
 import './MerchantsExport.css';
 
 const MerchantsExport = () => {
@@ -21,9 +22,10 @@ const MerchantsExport = () => {
         throw new Error(`Authentification requise pour l'exportation.`);
       }
 
-      let url = exportType === 'operators' 
-        ? 'https://backend-vercel-one-kappa.vercel.app/api/merchants/export-operators' 
-        : 'https://backend-vercel-one-kappa.vercel.app/api/merchants/export';
+      const endpoint = exportType === 'operators' 
+        ? '/api/merchants/export-operators' 
+        : '/api/merchants/export';
+      let url = `${API_BASE_URL}${endpoint}`;
 
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', new Date(startDate).toISOString());
