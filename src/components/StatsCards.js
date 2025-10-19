@@ -1,9 +1,9 @@
 import React from 'react';
 import './StatsCards.css';
 
-const StatsCards = ({ title, value, icon }) => {
+const StatsCards = ({ title, value, icon, onClick, className }) => {
   return (
-    <div className="card stat-card">
+    <div className={`card stat-card ${className || ''}`} onClick={onClick}>
       <div className="card-body">
         <div className="stat-card-icon">{icon}</div>
         <div className="stat-card-content">
