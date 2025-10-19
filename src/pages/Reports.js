@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
+import MerchantsExport from '../components/MerchantsExport'; // Import MerchantsExport
 import './Dashboard.css';
 import './Reports.css';
 
@@ -53,10 +54,18 @@ const Reports = () => {
       <Sidebar />
       <main className="main-content">
         <header className="main-header">
-          <h1>Rapports de Performance</h1>
+          <h1>Rapports</h1>
         </header>
 
+        {/* Merchant Export Card */}
         <div className="card">
+            <div className="card-body">
+                <MerchantsExport />
+            </div>
+        </div>
+
+        {/* Performance Export Card */}
+        <div className="card mt-4">
           <div className="card-header">
             <h3>Exporter les Performances</h3>
           </div>
