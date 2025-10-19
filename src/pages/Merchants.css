@@ -44,3 +44,17 @@
 .text-danger {
     color: var(--color-danger);
 }
+
+/* Added styles for the reports section */
+.reports-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+@media (max-width: 992px) {
+  .reports-section {
+    grid-template-columns: 1fr;
+  }
+}

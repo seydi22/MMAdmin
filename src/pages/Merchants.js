@@ -6,8 +6,10 @@ import MerchantsExport from '../components/MerchantsExport';
 import API_BASE_URL from '../config/apiConfig';
 import './Dashboard.css';
 import './Merchants.css';
+import './Reports.css'; // Import styles from Reports.css
 
 const Merchants = () => {
+  // States from Merchants.js
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,23 +20,53 @@ const Merchants = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const navigate = useNavigate();
 
-  const handleMerchantClick = (merchantId) => {
-    navigate(`/merchants/${merchantId}`);
+  // States from Reports.js for performance export
+  const [perfStartDate, setPerfStartDate] = useState('');
+  const [perfEndDate, setPerfEndDate] = useState('');
+  const [teams, setTeams] = useState([]);
+  const [perfSelectedTeam, setPerfSelectedTeam] = useState('');
+  const [perfSelectedAgent, setPerfSelectedAgent] = useState('');
+
+  // Merged useEffect to fetch data for filters
+  useEffect(() => {
+    const fetchDataForFilters = async () => {
+      const token = localStorage.getItem('token');
+      const config = { headers: { 'x-auth-token': token } };
+      try {
+        const [agentsRes, supervisorsRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/api/agents/all-agents`, config),
+          axios.get(`${API_BASE_URL}/api/agents/all-supervisors`, config),
+        ]);
+        setAgents(agentsRes.data);
+        setTeams(supervisorsRes.data);
+      } catch (error) {
+        console.error('Error fetching data for filters:', error);
+      }
+    };
+    fetchDataForFilters();
+  }, []);
+
+  // handlePerformanceExport function from Reports.js
+  const handlePerformanceExport = () => {
+    const params = new URLSearchParams();
+    if (perfStartDate) params.append('startDate', perfStartDate);
+    if (perfEndDate) params.append('endDate', perfEndDate);
+    if (perfSelectedTeam) params.append('teamId', perfSelectedTeam);
+    if (perfSelectedAgent) params.append('agentId', perfSelectedAgent);
+
+    const url = `${API_BASE_URL}/api/export/performance?${params.toString()}`;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'performances.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const fetchAgents = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentification requise.');
-      }
-      const response = await axios.get(`${API_BASE_URL}/api/agents/all-agents`, {
-        headers: { 'x-auth-token': token },
-      });
-      setAgents(response.data);
-    } catch (err) {
-      console.error(err);
-    }
+  // Functions from Merchants.js
+  const handleMerchantClick = (merchantId) => {
+    navigate(`/merchants/${merchantId}`);
   };
 
   const fetchMerchants = async () => {
@@ -69,10 +101,6 @@ const Merchants = () => {
   };
 
   useEffect(() => {
-    fetchAgents();
-  }, []);
-
-  useEffect(() => {
     fetchMerchants();
   }, [statusFilter, searchTerm, selectedAgent, sortConfig]);
 
@@ -103,10 +131,12 @@ const Merchants = () => {
       <Sidebar />
       <main className="main-content">
         <header className="main-header">
-          <h1>Gestion des marchands</h1>
+          <h1>Gestion des marchands et Rapports</h1>
         </header>
 
+        {/* Existing merchants list card */}
         <div className="card">
+          {/* ... card header with filters ... */}
           <div className="card-header">
             <div className="filters-container">
               <input
@@ -141,6 +171,7 @@ const Merchants = () => {
               </select>
             </div>
           </div>
+          {/* ... card body with table ... */}
           <div className="card-body">
             {loading ? (
               <p>Chargement...</p>
@@ -184,10 +215,77 @@ const Merchants = () => {
             )}
           </div>
         </div>
-        <div className="card mt-4">
-          <div className="card-body">
-            <MerchantsExport />
-          </div>
+
+        {/* Export sections */}
+        <div className="reports-section">
+            {/* Performance Export Card */}
+            <div className="card mt-4">
+                <div className="card-header">
+                    <h3>Exporter les Performances</h3>
+                </div>
+                <div className="card-body">
+                    <div className="filters-container">
+                        <div className="form-group">
+                            <label>Date de début</label>
+                            <input
+                                type="date"
+                                value={perfStartDate}
+                                onChange={(e) => setPerfStartDate(e.target.value)}
+                                className="form-control"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Date de fin</label>
+                            <input
+                                type="date"
+                                value={perfEndDate}
+                                onChange={(e) => setPerfEndDate(e.target.value)}
+                                className="form-control"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Équipe (Superviseur)</label>
+                            <select
+                                value={perfSelectedTeam}
+                                onChange={(e) => setPerfSelectedTeam(e.target.value)}
+                                className="form-control"
+                            >
+                                <option value="">Toutes les équipes</option>
+                                {teams.map((team) => (
+                                <option key={team._id} value={team._id}>
+                                    {team.nom}
+                                </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Agent</label>
+                            <select
+                                value={perfSelectedAgent}
+                                onChange={(e) => setPerfSelectedAgent(e.target.value)}
+                                className="form-control"
+                            >
+                                <option value="">Tous les agents</option>
+                                {agents.map((agent) => (
+                                <option key={agent._id} value={agent._id}>
+                                    {agent.nom} ({agent.matricule})
+                                </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <button onClick={handlePerformanceExport} className="btn btn-primary">
+                        Exporter en Excel
+                    </button>
+                </div>
+            </div>
+
+            {/* Merchant Export Card */}
+            <div className="card mt-4">
+                <div className="card-body">
+                    <MerchantsExport />
+                </div>
+            </div>
         </div>
       </main>
     </div>
