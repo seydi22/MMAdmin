@@ -3,7 +3,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faUserShield,faFileAlt,faChartLine, faSignOutAlt,faStore,faUsers, faCheckDouble, faChartBar} from '@fortawesome/free-solid-svg-icons';
+import { faUserShield, faFileAlt, faChartLine, faSignOutAlt, faStore, faUsers, faCheckDouble, faChartBar, faCog } from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 import logo from '../image/logo.png';
 
@@ -27,6 +27,11 @@ const Sidebar = () => {
         <NavLink to="/" className="nav-link">
           <FontAwesomeIcon icon={faChartLine} />
           <span>Dashboard</span>
+        </NavLink>
+
+        <NavLink to="/settings" className="nav-link">
+          <FontAwesomeIcon icon={faCog} />
+          <span>Paramètres</span>
         </NavLink>
 
         {userRole === 'admin' && (

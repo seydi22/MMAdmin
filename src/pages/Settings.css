@@ -1,0 +1,108 @@
+/* src/pages/Settings.css */
+
+.settings-page {
+    display: flex;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+.settings-container {
+    flex-grow: 1;
+    padding: 2rem;
+    margin-left: 250px; /* Adjust this based on your Sidebar width */
+}
+
+.settings-container h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.change-password-section {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    max-width: 600px;
+}
+
+.change-password-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #555;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #666;
+}
+
+.password-input {
+    position: relative;
+}
+
+.password-input input {
+    width: 100%;
+    padding: 0.75rem;
+    padding-right: 3rem; /* Space for the icon */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.password-input input:focus {
+    outline: none;
+    border-color: #005BAC; /* Main theme color */
+}
+
+.password-icon {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+}
+
+.update-btn {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: #005BAC; /* Main theme color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.update-btn:hover {
+    background-color: #004a8c;
+}
+
+.update-btn:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: #d9534f; /* Red for errors */
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.success-message {
+    color: #5cb85c; /* Green for success */
+    margin-top: 1rem;
+    text-align: center;
+}
