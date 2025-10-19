@@ -1,55 +1,14 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import './Settings.css';
-import Sidebar from '../components/Sidebar';
+import api from '../services/api';
 
-const Settings = () => {
-    const [oldPassword, setOldPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showOldPassword, setShowOldPassword] = useState(false);
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setMessage('');
-        setError('');
-
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            setError("Tous les champs sont obligatoires.");
-            return;
-        }
-
-        if (newPassword.length < 6) {
-            setError("Le nouveau mot de passe doit comporter au moins 6 caractères.");
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            setError("Les champs “Nouveau mot de passe” et “Confirmer le mot de passe” doivent correspondre.");
-            return;
-        }
-
-        setLoading(true);
+// ... (rest of the component)
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.put(
-                `${process.env.REACT_APP_API_URL}/api/agents/change-password`,
+            const response = await api.put(
+                `/api/agents/change-password`,
                 {
                     ancienMotDePasse: oldPassword,
                     nouveauMotDePasse: newPassword,
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
                 }
             );
 
