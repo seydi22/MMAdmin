@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import MerchantsExport from '../components/MerchantsExport'; // Import the export component
+import MerchantsExport from '../components/MerchantsExport';
 import API_BASE_URL from '../config/apiConfig';
-import './Dashboard.css'; // S'assurer que les styles du tableau de bord sont inclus
+import './Dashboard.css';
 import './Merchants.css';
 
 const Merchants = () => {
@@ -13,10 +13,28 @@ const Merchants = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Tous');
+  const [agents, setAgents] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const navigate = useNavigate();
 
   const handleMerchantClick = (merchantId) => {
     navigate(`/merchants/${merchantId}`);
+  };
+
+  const fetchAgents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentification requise.');
+      }
+      const response = await axios.get(`${API_BASE_URL}/api/agents/all-agents`, {
+        headers: { 'x-auth-token': token },
+      });
+      setAgents(response.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const fetchMerchants = async () => {
@@ -32,12 +50,13 @@ const Merchants = () => {
       const params = {
         statut: statusFilter === 'Tous' ? '' : statusFilter,
         search: searchTerm,
+        agentId: selectedAgent,
+        sortBy: sortConfig.key,
+        sortOrder: sortConfig.direction === 'ascending' ? 'asc' : 'desc',
       };
 
       const response = await axios.get(url, {
-        headers: {
-          'x-auth-token': token,
-        },
+        headers: { 'x-auth-token': token },
         params: params,
       });
       setMerchants(response.data);
@@ -50,8 +69,34 @@ const Merchants = () => {
   };
 
   useEffect(() => {
+    fetchAgents();
+  }, []);
+
+  useEffect(() => {
     fetchMerchants();
-  }, [statusFilter, searchTerm]);
+  }, [statusFilter, searchTerm, selectedAgent, sortConfig]);
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedMerchants = useMemo(() => {
+    return [...merchants];
+  }, [merchants]);
+
+  const formatReadableDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className="dashboard-layout">
@@ -82,6 +127,18 @@ const Merchants = () => {
                 <option value="validé">Validé</option>
                 <option value="rejeté">Rejeté</option>
               </select>
+              <select
+                value={selectedAgent}
+                onChange={(e) => setSelectedAgent(e.target.value)}
+                className="form-control"
+              >
+                <option value="">Enrôlé par (tous)</option>
+                {agents.map((agent) => (
+                  <option key={agent._id} value={agent._id}>
+                    {agent.nom} ({agent.matricule})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="card-body">
@@ -94,15 +151,16 @@ const Merchants = () => {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Enseigne</th>
-                      <th>Gérant</th>
-                      <th>Contact</th>
-                      <th>Statut</th>
-                      <th>Enrôlé par</th>
+                      <th onClick={() => requestSort('nom')}>Enseigne</th>
+                      <th onClick={() => requestSort('nomGerant')}>Gérant</th>
+                      <th onClick={() => requestSort('contact')}>Contact</th>
+                      <th onClick={() => requestSort('statut')}>Statut</th>
+                      <th onClick={() => requestSort('agentRecruteurId')}>Enrôlé par</th>
+                      <th onClick={() => requestSort('createdAt')}>Date d’enrôlement</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {merchants.map((merchant) => (
+                    {sortedMerchants.map((merchant) => (
                       <tr
                         key={merchant._id}
                         onClick={() => handleMerchantClick(merchant._id)}
@@ -117,6 +175,7 @@ const Merchants = () => {
                           </span>
                         </td>
                         <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
+                        <td>{formatReadableDate(merchant.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>
