@@ -1,25 +1,24 @@
-
-import React, { useState } from '''react''';
-import axios from '''axios''';
-import { FaEye, FaEyeSlash } from '''react-icons/fa''';
-import '''./Settings.css''';
-import Sidebar from '''../components/Sidebar''';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import './Settings.css';
+import Sidebar from '../components/Sidebar';
 
 const Settings = () => {
-    const [oldPassword, setOldPassword] = useState(''');
-    const [newPassword, setNewPassword] = useState(''');
-    const [confirmPassword, setConfirmPassword] = useState(''');
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [message, setMessage] = useState(''');
-    const [error, setError] = useState(''');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage(''');
-        setError(''');
+        setMessage('');
+        setError('');
 
         if (!oldPassword || !newPassword || !confirmPassword) {
             setError("Tous les champs sont obligatoires.");
@@ -39,7 +38,7 @@ const Settings = () => {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem('''token''');
+            const token = localStorage.getItem('token');
             const response = await axios.put(
                 `${process.env.REACT_APP_API_URL}/api/agents/change-password`,
                 {
@@ -48,24 +47,24 @@ const Settings = () => {
                 },
                 {
                     headers: {
-                        '''Content-Type''': '''application/json''',
-                        '''Authorization''': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 }
             );
 
             if (response.status === 200) {
                 setMessage("Mot de passe mis à jour avec succès.");
-                setOldPassword(''');
-                setNewPassword(''');
-                setConfirmPassword(''');
+                setOldPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
             }
         } catch (err) {
             if (err.response) {
                 if (err.response.status === 500) {
                     setError("Erreur du serveur, veuillez réessayer.");
                 } else {
-                    setError(err.response.data.msg || "Une erreur s'''est produite.");
+                    setError(err.response.data.msg || "Une erreur s'est produite.");
                 }
             } else {
                 setError("Erreur de connexion, veuillez vérifier votre réseau.");
@@ -87,7 +86,7 @@ const Settings = () => {
                             <label>Ancien mot de passe</label>
                             <div className="password-input">
                                 <input
-                                    type={showOldPassword ? '''text''' : '''password'''}
+                                    type={showOldPassword ? 'text' : 'password'}
                                     value={oldPassword}
                                     onChange={(e) => setOldPassword(e.target.value)}
                                 />
@@ -100,7 +99,7 @@ const Settings = () => {
                             <label>Nouveau mot de passe</label>
                             <div className="password-input">
                                 <input
-                                    type={showNewPassword ? '''text''' : '''password'''}
+                                    type={showNewPassword ? 'text' : 'password'}
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                 />
@@ -113,7 +112,7 @@ const Settings = () => {
                             <label>Confirmer le nouveau mot de passe</label>
                             <div className="password-input">
                                 <input
-                                    type={showConfirmPassword ? '''text''' : '''password'''}
+                                    type={showConfirmPassword ? 'text' : 'password'}
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
@@ -127,7 +126,7 @@ const Settings = () => {
                         {message && <p className="success-message">{message}</p>}
 
                         <button type="submit" className="update-btn" disabled={loading}>
-                            {loading ? '''Mise à jour...''' : '''Mettre à jour le mot de passe'''}
+                            {loading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
                         </button>
                     </form>
                 </div>
