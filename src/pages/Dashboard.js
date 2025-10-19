@@ -96,9 +96,11 @@ const Dashboard = () => {
             title="Marchands"
             value={stats?.totalMerchants || 0}
             icon={<FontAwesomeIcon icon={faStore} />}
+            onClick={() => navigate('/merchants')}
+            className="clickable"
           />
           <StatsCards
-            title="Agents"
+            title="Souscripteur"
             value={stats?.totalAgents || 0}
             icon={<FontAwesomeIcon icon={faUsers} />}
             onClick={() => navigate('/agents')}
