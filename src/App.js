@@ -17,6 +17,7 @@ import AdminValidation from './pages/AdminValidation'; // Import the new page
 import SupervisorPerformance from './pages/SupervisorPerformance';
 import AdminLogs from './pages/AdminLogs'; // Import the new page
 import Settings from './pages/Settings'; // Import the Settings page
+import MerchantMap from './pages/MerchantMap'; // Import the new map page
 
 /**
  * Composant principal de l'application gérant toutes les routes.
@@ -115,6 +116,9 @@ const AppContent = () => {
           </PrivateRoute>
         }
       />
+
+      {/* Route pour la carte des marchands */}
+      <Route path="/carte" element={<PrivateRoute roleRequired="admin"><MerchantMap /></PrivateRoute>} />
 
     </Routes>
   );

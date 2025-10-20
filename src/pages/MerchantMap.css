@@ -1,0 +1,13 @@
+.leaflet-container {
+  width: 100%;
+  height: 100vh; /* Make it full height */
+}
+
+.map-loading, .map-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #555;
+}
