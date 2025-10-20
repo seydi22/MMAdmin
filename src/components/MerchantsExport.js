@@ -35,7 +35,15 @@ const MerchantsExport = () => {
         url += `?${params.toString()}`;
       }
 
-      const fileName = exportType === 'operators' ? 'operators_export.xlsx' : 'merchants_export.xlsx';
+      const generateFileName = (type) => {
+        const now = new Date();
+        const date = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+        const time = now.toTimeString().slice(0, 5).replace(':', ''); // HHmm
+        const uniqueID = Math.random().toString(36).substring(2, 8); // 6-character random string
+        return `export_${type}_${date}_${time}_${uniqueID}.xlsx`;
+      };
+
+      const fileName = generateFileName(exportType);
 
       const response = await axios.get(url, {
         headers: {

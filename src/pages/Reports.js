@@ -59,14 +59,15 @@ const Reports = () => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
-      const contentDisposition = res.headers['content-disposition'];
-      let filename = 'performances.xlsx'; // Default filename
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch && filenameMatch.length > 1) {
-          filename = filenameMatch[1];
-        }
-      }
+      const generateFileName = (type) => {
+        const now = new Date();
+        const date = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+        const time = now.toTimeString().slice(0, 5).replace(':', ''); // HHmm
+        const uniqueID = Math.random().toString(36).substring(2, 8); // 6-character random string
+        return `export_${type}_${date}_${time}_${uniqueID}.xlsx`;
+      };
+
+      const filename = generateFileName('performance');
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
