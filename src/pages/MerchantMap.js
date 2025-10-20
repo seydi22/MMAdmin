@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
@@ -28,11 +27,14 @@ const MerchantMap = () => {
   useEffect(() => {
     const fetchMerchants = async () => {
       try {
-        // Note: Assurez-vous que le proxy est configuré dans package.json ("proxy": "http://localhost: VOTRE_PORT")
-        // ou utilisez l'URL complète de votre API.
-        const response = await fetch('/api/merchants/localisation');
+        const apiUrl = process.env.REACT_APP_API_URL;
+        if (!apiUrl) {
+          throw new Error("L'URL de l'API n'est pas configurée. Veuillez définir REACT_APP_API_URL.");
+        }
+        const response = await fetch(`${apiUrl}/api/merchants/localisation`);
         if (!response.ok) {
-          throw new Error('La requête a échoué. Veuillez vérifier l\'endpoint API.');
+          const errorBody = await response.text();
+          throw new Error(`La requête a échoué: ${response.status} ${response.statusText}. Réponse: ${errorBody}`);
         }
         const data = await response.json();
         setMerchants(data);
