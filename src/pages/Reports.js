@@ -39,7 +39,7 @@ const Reports = () => {
     if (selectedTeam) params.append('teamId', selectedTeam);
     if (selectedAgent) params.append('agentId', selectedAgent);
 
-    const url = `${API_BASE_URL}/api/export/performance?${params.toString()}`;
+    const url = `${API_BASE_URL}/api/performance/export?${params.toString()}`;
 
     const link = document.createElement('a');
     link.href = url;
