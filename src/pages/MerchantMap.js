@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
 
@@ -10,7 +10,7 @@ import L from 'leaflet';
 import './MerchantMap.css';
 import './Dashboard.css';
 
-// Correction pour l'icône par défaut de Leaflet qui peut être cassée
+// Correction pour l'icône par défaut de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -18,12 +18,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// --- Icônes personnalisées pour les statuts ---
+// --- Logique des icônes (standardisée sans accents) ---
 const getIconByStatus = (status) => {
   const statusClassName = {
-    'validé': 'marker-icon-valide',
-    'en attente': 'marker-icon-en-attente',
-    'rejeté': 'marker-icon-rejete',
+    'valide': 'marker-icon-valide',
+    'en_attente': 'marker-icon-en-attente',
+    'rejete': 'marker-icon-rejete',
   };
   return L.divIcon({
     className: `custom-marker-icon ${statusClassName[status] || 'marker-icon-default'}`,
@@ -34,7 +34,13 @@ const getIconByStatus = (status) => {
   });
 };
 
-// --- Composant pour la légende de la carte ---
+// --- Libellés pour l'affichage (avec accents)
+const statusLabels = {
+  valide: 'Validé',
+  en_attente: 'En attente',
+  rejete: 'Rejeté',
+};
+
 const MapLegend = () => (
   <div className="map-legend">
     <h4>Légende</h4>
@@ -44,13 +50,11 @@ const MapLegend = () => (
   </div>
 );
 
-// --- Composant pour changer le fond de carte ---
 const TileLayerSwitcher = ({ tileLayer, setTileLayer }) => {
   const tileLayers = {
     osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: 'OpenStreetMap' },
     cartoDark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: 'CartoDB Dark' },
   };
-
   return (
     <div className="control-group">
       <label htmlFor="tile-layer-select">Fond de carte :</label>
@@ -68,15 +72,14 @@ const MerchantMap = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // --- États pour les filtres et la recherche ---
-  const [statusFilter, setStatusFilter] = useState({ valide: true, 'en attente': true, rejete: true });
+  // --- États (standardisés sans accents) ---
+  const [statusFilter, setStatusFilter] = useState({ valide: true, en_attente: true, rejete: true });
   const [agentFilter, setAgentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
   const mapRef = useRef(null);
   const markerRefs = useRef({});
-
   const nouakchottPosition = [18.0735, -15.9686];
 
   useEffect(() => {
@@ -89,15 +92,18 @@ const MerchantMap = () => {
           headers: { 'x-auth-token': token },
         });
         
-        // Simuler des données statut/matricule si elles n'existent pas
+        // --- Simulation de données (standardisée sans accents) ---
         const merchantsWithDemoData = response.data.map(m => ({
           ...m,
-          statut: m.statut || ['validé', 'en attente', 'rejeté'][Math.floor(Math.random() * 3)],
+          statut: m.statut || ['valide', 'en_attente', 'rejete'][Math.floor(Math.random() * 3)],
           matricule: m.matricule || `MT-${Math.floor(1000 + Math.random() * 9000)}`,
-          agentNom: m.agentNom || `Agent ${['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]}`
+          agentNom: m.agentNom || `Agent Fictif ${[1, 2, 3, 4][Math.floor(Math.random() * 4)]}`
         }));
 
+        // --- POINT DE DÉBOGAGE 1 --- 
+        console.log('Marchands traités (avec données simulées si besoin) :', merchantsWithDemoData);
         setMerchants(merchantsWithDemoData);
+
       } catch (err) {
         setError(err.response?.data?.msg || err.message || 'Une erreur est survenue.');
       } finally {
@@ -107,14 +113,18 @@ const MerchantMap = () => {
     fetchMerchants();
   }, []);
 
-  // --- Listes uniques pour les filtres ---
-  const agentNames = useMemo(() => ['all', ...new Set(merchants.map(m => m.agentNom))], [merchants]);
+  const hasAgentData = useMemo(() => merchants.some(m => m.agentNom), [merchants]);
+  const agentNames = useMemo(() => ['all', ...new Set(merchants.filter(m => m.agentNom).map(m => m.agentNom))], [merchants]);
 
-  // --- Logique de filtrage ---
   const filteredMerchants = useMemo(() => {
-    return merchants
+    const filtered = merchants
       .filter(m => statusFilter[m.statut])
       .filter(m => agentFilter === 'all' || m.agentNom === agentFilter);
+    
+    // --- POINT DE DÉBOGAGE 2 ---
+    console.log('Marchands après filtrage :', filtered);
+    return filtered;
+
   }, [merchants, statusFilter, agentFilter]);
 
   const searchedMerchants = useMemo(() => {
@@ -131,13 +141,9 @@ const MerchantMap = () => {
   };
 
   const handleSearchResultClick = (merchant) => {
-    if (mapRef.current) {
-      mapRef.current.flyTo([merchant.lat, merchant.lng], 17);
-    }
+    if (mapRef.current) mapRef.current.flyTo([merchant.lat, merchant.lng], 17);
     const marker = markerRefs.current[merchant.id];
-    if (marker) {
-      marker.openPopup();
-    }
+    if (marker) marker.openPopup();
   };
 
   const renderMap = () => {
@@ -158,7 +164,7 @@ const MerchantMap = () => {
             <Popup>
               <b>{merchant.nom}</b><br />
               Matricule: {merchant.matricule}<br />
-              Statut: {merchant.statut}
+              Statut: {statusLabels[merchant.statut] || merchant.statut}
             </Popup>
           </Marker>
         ))}
@@ -174,10 +180,8 @@ const MerchantMap = () => {
           <h1>Carte des Marchands</h1>
         </header>
         <div className="merchant-map-page-container">
-          {/* --- Panneau de Contrôle --- */}
           <div className="map-controls-panel">
             <h3>Contrôles</h3>
-            
             <div className="control-group">
               <label>Rechercher par nom/matricule :</label>
               <input type="text" placeholder="Rechercher..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -185,9 +189,7 @@ const MerchantMap = () => {
                 <ul className="search-results-list">
                   {searchedMerchants.length > 0 ? (
                     searchedMerchants.map(m => (
-                      <li key={m.id} onClick={() => handleSearchResultClick(m)}>
-                        {m.nom} ({m.matricule})
-                      </li>
+                      <li key={m.id} onClick={() => handleSearchResultClick(m)}>{m.nom} ({m.matricule})</li>
                     ))
                   ) : (
                     <li className="no-results">Aucun résultat</li>
@@ -195,33 +197,28 @@ const MerchantMap = () => {
                 </ul>
               )}
             </div>
-
             <div className="control-group">
               <label>Filtrer par statut :</label>
-              {Object.keys(statusFilter).map(status => (
-                <div key={status}>
-                  <input type="checkbox" id={`status-${status}`} name={status} checked={statusFilter[status]} onChange={handleStatusChange} />
-                  <label htmlFor={`status-${status}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</label>
+              {Object.keys(statusFilter).map(statusKey => (
+                <div key={statusKey}>
+                  <input type="checkbox" id={`status-${statusKey}`} name={statusKey} checked={statusFilter[statusKey]} onChange={handleStatusChange} />
+                  <label htmlFor={`status-${statusKey}`}>{statusLabels[statusKey]}</label>
                 </div>
               ))}
             </div>
-
-            <div className="control-group">
-              <label htmlFor="agent-select">Filtrer par agent :</label>
-              <select id="agent-select" value={agentFilter} onChange={e => setAgentFilter(e.target.value)}>
-                {agentNames.map(name => (
-                  <option key={name} value={name}>{name === 'all' ? 'Tous les agents' : name}</option>
-                ))}
-              </select>
-            </div>
-
+            {hasAgentData && agentNames.length > 2 && (
+              <div className="control-group">
+                <label htmlFor="agent-select">Filtrer par agent :</label>
+                <select id="agent-select" value={agentFilter} onChange={e => setAgentFilter(e.target.value)}>
+                  {agentNames.map(name => (
+                    <option key={name} value={name}>{name === 'all' ? 'Tous les agents' : name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <TileLayerSwitcher tileLayer={tileLayer} setTileLayer={setTileLayer} />
           </div>
-
-          {/* --- Conteneur de la carte --- */}
-          <div className="map-view-container">
-            {renderMap()}
-          </div>
+          <div className="map-view-container">{renderMap()}</div>
         </div>
       </main>
     </div>
