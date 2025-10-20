@@ -32,21 +32,50 @@ const Reports = () => {
     fetchData();
   }, []);
 
-  const handleExport = () => {
+  const handleExport = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("No token found");
+      // You might want to redirect to login or show a message
+      return;
+    }
+
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
     if (selectedTeam) params.append('teamId', selectedTeam);
     if (selectedAgent) params.append('agentId', selectedAgent);
 
-    const url = `${API_BASE_URL}/api/performance/export?${params.toString()}`;
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/export/performance`, {
+        params,
+        headers: {
+          'x-auth-token': token,
+        },
+        responseType: 'blob', // Important for file downloads
+      });
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'performances.xlsx'); // You can name the file here
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const contentDisposition = res.headers['content-disposition'];
+      let filename = 'performances.xlsx'; // Default filename
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch && filenameMatch.length > 1) {
+          filename = filenameMatch[1];
+        }
+      }
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting performance data:', error);
+      // Handle error, e.g., show a notification to the user
+    }
   };
 
   return (
