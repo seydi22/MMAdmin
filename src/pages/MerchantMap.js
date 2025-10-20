@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -18,12 +19,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// --- Logique des icônes (standardisée sans accents) ---
+// --- Logique des icônes (basée sur les données réelles "validé") ---
 const getIconByStatus = (status) => {
   const statusClassName = {
-    'valide': 'marker-icon-valide',
-    'en_attente': 'marker-icon-en-attente',
-    'rejete': 'marker-icon-rejete',
+    'validé': 'marker-icon-valide',
+    'en attente': 'marker-icon-en-attente',
+    'rejeté': 'marker-icon-rejete',
   };
   return L.divIcon({
     className: `custom-marker-icon ${statusClassName[status] || 'marker-icon-default'}`,
@@ -32,13 +33,6 @@ const getIconByStatus = (status) => {
     iconAnchor: [12, 12],
     popupAnchor: [0, -12],
   });
-};
-
-// --- Libellés pour l'affichage (avec accents)
-const statusLabels = {
-  valide: 'Validé',
-  en_attente: 'En attente',
-  rejete: 'Rejeté',
 };
 
 const MapLegend = () => (
@@ -72,8 +66,8 @@ const MerchantMap = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // --- États (standardisés sans accents) ---
-  const [statusFilter, setStatusFilter] = useState({ valide: true, en_attente: true, rejete: true });
+  // --- États (les clés correspondent maintenant aux données réelles) ---
+  const [statusFilter, setStatusFilter] = useState({ 'validé': true, 'en attente': true, 'rejeté': true });
   const [agentFilter, setAgentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
@@ -92,17 +86,10 @@ const MerchantMap = () => {
           headers: { 'x-auth-token': token },
         });
         
-        // --- Simulation de données (standardisée sans accents) ---
-        const merchantsWithDemoData = response.data.map(m => ({
-          ...m,
-          statut: m.statut || ['valide', 'en_attente', 'rejete'][Math.floor(Math.random() * 3)],
-          matricule: m.matricule || `MT-${Math.floor(1000 + Math.random() * 9000)}`,
-          agentNom: m.agentNom || `Agent Fictif ${[1, 2, 3, 4][Math.floor(Math.random() * 4)]}`
-        }));
-
-        // --- POINT DE DÉBOGAGE 1 --- 
-        console.log('Marchands traités (avec données simulées si besoin) :', merchantsWithDemoData);
-        setMerchants(merchantsWithDemoData);
+        // --- PLUS DE DONNÉES SIMULÉES ---
+        // On utilise directement les données du backend.
+        console.log('Données réelles reçues du backend :', response.data);
+        setMerchants(response.data);
 
       } catch (err) {
         setError(err.response?.data?.msg || err.message || 'Une erreur est survenue.');
@@ -113,15 +100,15 @@ const MerchantMap = () => {
     fetchMerchants();
   }, []);
 
-  const hasAgentData = useMemo(() => merchants.some(m => m.agentNom), [merchants]);
-  const agentNames = useMemo(() => ['all', ...new Set(merchants.filter(m => m.agentNom).map(m => m.agentNom))], [merchants]);
+  // --- Logique de filtrage par agent (utilise "matricule") ---
+  const hasAgentData = useMemo(() => merchants.some(m => m.matricule && m.matricule !== 'N/A'), [merchants]);
+  const agentMatricules = useMemo(() => ['all', ...new Set(merchants.filter(m => m.matricule && m.matricule !== 'N/A').map(m => m.matricule))], [merchants]);
 
   const filteredMerchants = useMemo(() => {
     const filtered = merchants
       .filter(m => statusFilter[m.statut])
-      .filter(m => agentFilter === 'all' || m.agentNom === agentFilter);
+      .filter(m => agentFilter === 'all' || m.matricule === agentFilter);
     
-    // --- POINT DE DÉBOGAGE 2 ---
     console.log('Marchands après filtrage :', filtered);
     return filtered;
 
@@ -130,8 +117,7 @@ const MerchantMap = () => {
   const searchedMerchants = useMemo(() => {
     if (!searchTerm) return [];
     return filteredMerchants.filter(m =>
-      (m.nom && m.nom.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (m.matricule && m.matricule.toLowerCase().includes(searchTerm.toLowerCase()))
+      (m.nom && m.nom.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [filteredMerchants, searchTerm]);
 
@@ -163,8 +149,8 @@ const MerchantMap = () => {
           >
             <Popup>
               <b>{merchant.nom}</b><br />
-              Matricule: {merchant.matricule}<br />
-              Statut: {statusLabels[merchant.statut] || merchant.statut}
+              Agent (Matricule): {merchant.matricule}<br />
+              Statut: {merchant.statut}
             </Popup>
           </Marker>
         ))}
@@ -183,13 +169,13 @@ const MerchantMap = () => {
           <div className="map-controls-panel">
             <h3>Contrôles</h3>
             <div className="control-group">
-              <label>Rechercher par nom/matricule :</label>
+              <label>Rechercher par nom :</label>
               <input type="text" placeholder="Rechercher..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
               {searchTerm && (
                 <ul className="search-results-list">
                   {searchedMerchants.length > 0 ? (
                     searchedMerchants.map(m => (
-                      <li key={m.id} onClick={() => handleSearchResultClick(m)}>{m.nom} ({m.matricule})</li>
+                      <li key={m.id} onClick={() => handleSearchResultClick(m)}>{m.nom}</li>
                     ))
                   ) : (
                     <li className="no-results">Aucun résultat</li>
@@ -202,15 +188,15 @@ const MerchantMap = () => {
               {Object.keys(statusFilter).map(statusKey => (
                 <div key={statusKey}>
                   <input type="checkbox" id={`status-${statusKey}`} name={statusKey} checked={statusFilter[statusKey]} onChange={handleStatusChange} />
-                  <label htmlFor={`status-${statusKey}`}>{statusLabels[statusKey]}</label>
+                  <label htmlFor={`status-${statusKey}`}>{statusKey.charAt(0).toUpperCase() + statusKey.slice(1)}</label>
                 </div>
               ))}
             </div>
-            {hasAgentData && agentNames.length > 2 && (
+            {hasAgentData && agentMatricules.length > 2 && (
               <div className="control-group">
-                <label htmlFor="agent-select">Filtrer par agent :</label>
+                <label htmlFor="agent-select">Filtrer par agent (matricule) :</label>
                 <select id="agent-select" value={agentFilter} onChange={e => setAgentFilter(e.target.value)}>
-                  {agentNames.map(name => (
+                  {agentMatricules.map(name => (
                     <option key={name} value={name}>{name === 'all' ? 'Tous les agents' : name}</option>
                   ))}
                 </select>
