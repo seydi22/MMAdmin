@@ -37,3 +37,16 @@
 .mt-3 {
     margin-top: 1rem;
 }
+
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filters-container .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

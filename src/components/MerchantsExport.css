@@ -19,13 +19,15 @@
 
 .filter-container {
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
-  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
 }
 
 .filter-container .form-group {
-  flex: 0 0 calc(50% - var(--spacing-md) / 2); /* Two columns with gap */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   min-width: 280px; /* Ensure a minimum width for readability */
   margin-bottom: 0; /* Remove default form-group margin if flex item */
 }
