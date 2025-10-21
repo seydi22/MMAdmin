@@ -3,12 +3,14 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
 import MerchantsExport from '../components/MerchantsExport'; // Import MerchantsExport
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import './Dashboard.css';
 import './Reports.css';
 
 const Reports = () => {
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState('');
   const [agents, setAgents] = useState([]);
@@ -103,20 +105,20 @@ const Reports = () => {
             <div className="filters-container">
               <div className="form-group">
                 <label>Date de début</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
                   className="form-control"
+                  dateFormat="yyyy-MM-dd"
                 />
               </div>
               <div className="form-group">
                 <label>Date de fin</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
                   className="form-control"
+                  dateFormat="yyyy-MM-dd"
                 />
               </div>
               <div className="form-group">

@@ -1,6 +1,8 @@
 // src/components/MerchantsExport.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import API_BASE_URL from '../config/apiConfig'; // Importer la constante
 import './MerchantsExport.css';
 
@@ -8,8 +10,8 @@ const MerchantsExport = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const handleExport = async (exportType) => {
     setLoading(true);
@@ -88,22 +90,22 @@ const MerchantsExport = () => {
       <div className="filter-container">
         <div className="form-group">
           <label htmlFor="startDate">Date de début de validation</label>
-          <input
-            type="datetime-local"
-            id="startDate"
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            showTimeSelect
+            dateFormat="Pp"
             className="form-control"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
           />
         </div>
         <div className="form-group">
           <label htmlFor="endDate">Date de fin de validation</label>
-          <input
-            type="datetime-local"
-            id="endDate"
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            showTimeSelect
+            dateFormat="Pp"
             className="form-control"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
       </div>
