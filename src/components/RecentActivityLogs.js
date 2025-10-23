@@ -39,7 +39,7 @@ const RecentActivityLogs = () => {
 
       try {
         const res = await axios.get(`${API_BASE_URL}/api/logs`, config);
-        setLogs(res.data.slice(0, 5));
+        setLogs(res.data.logs.slice(0, 5));
       } catch (err) {
         setError('Erreur lors du chargement des logs.');
         console.error(err);
