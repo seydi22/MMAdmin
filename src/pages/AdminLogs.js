@@ -9,11 +9,25 @@ const AdminLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const logsPerPage = 15;
 
   useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page on new search
+    }, 500); // 500ms delay
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
     const fetchLogs = async () => {
+      setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) {
         setError('Veuillez vous authentifier.');
@@ -23,11 +37,17 @@ const AdminLogs = () => {
 
       const config = {
         headers: { 'x-auth-token': token },
+        params: {
+          page: currentPage,
+          limit: logsPerPage,
+          search: debouncedSearchTerm,
+        },
       };
 
       try {
         const res = await axios.get(`${API_BASE_URL}/api/logs`, config);
-        setLogs(res.data);
+        setLogs(res.data.logs);
+        setTotalPages(res.data.totalPages);
       } catch (err) {
         setError('Erreur lors du chargement des logs.');
         console.error(err);
@@ -37,23 +57,7 @@ const AdminLogs = () => {
     };
 
     fetchLogs();
-  }, []);
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    setCurrentPage(1); // Reset to first page on new search
-  };
-
-  const filteredLogs = logs.filter(log =>
-    log.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.action.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Pagination logic
-  const indexOfLastLog = currentPage * logsPerPage;
-  const indexOfFirstLog = indexOfLastLog - logsPerPage;
-  const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
-  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+  }, [currentPage, debouncedSearchTerm]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -75,7 +79,7 @@ const AdminLogs = () => {
               className="form-control"
               placeholder="Rechercher par matricule ou action..."
               value={searchTerm}
-              onChange={handleSearch}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="card-body">
@@ -90,7 +94,7 @@ const AdminLogs = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentLogs.map(log => (
+                {logs.map(log => (
                   <tr key={log._id}>
                     <td>{new Date(log.createdAt).toLocaleString()}</td>
                     <td>{log.matricule}</td>
