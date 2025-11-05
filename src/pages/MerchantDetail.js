@@ -48,6 +48,8 @@ const MerchantDetail = () => {
         return 'status-badge-pending';
       case 'rejeté':
         return 'status-badge-rejected';
+      case 'livré':
+        return 'status-badge-delivered';
       default:
         return 'status-badge-default';
     }
@@ -136,6 +138,33 @@ const MerchantDetail = () => {
           </div>
 
           {/* Operators Info */}
+          {merchant.statut === 'livré' && (
+            <div className="card-details full-width">
+              <div className="card-header-details">
+                <FaFileAlt className="card-icon" />
+                <h3>Informations de livraison</h3>
+              </div>
+              <div className="card-body-details grid-col-2">
+                <DetailItem label="Date de livraison" value={new Date(merchant.deliveredAt).toLocaleDateString()} />
+                <DetailItem label="Agent de livraison" value={merchant.deliveredBy} />
+              </div>
+              <div className="image-gallery-details">
+                {merchant.qrCodePhotoUrl && (
+                  <div className="image-item-details" onClick={() => setModalImage(merchant.qrCodePhotoUrl)}>
+                    <h6>Photo du QR code posé</h6>
+                    <img src={merchant.qrCodePhotoUrl} alt="QR Code" />
+                  </div>
+                )}
+                {merchant.paymentTestPhotoUrl && (
+                  <div className="image-item-details" onClick={() => setModalImage(merchant.paymentTestPhotoUrl)}>
+                    <h6>Capture du test de paiement</h6>
+                    <img src={merchant.paymentTestPhotoUrl} alt="Payment Test" />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {merchant.operators && merchant.operators.length > 0 && (
             <div className="card-details full-width">
                 <div className="card-header-details">

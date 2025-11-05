@@ -51,6 +51,10 @@ tbody tr:hover {
   background-color: #9b59b6; /* A distinct purple color */
 }
 
+.status-livré {
+  background-color: #3498db; /* A distinct blue color */
+}
+
 .actions {
   display: flex;
 

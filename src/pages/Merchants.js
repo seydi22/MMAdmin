@@ -126,6 +126,7 @@ const Merchants = () => {
                 <option value="validé_par_superviseur">Validé par superviseur</option>
                 <option value="validé">Validé</option>
                 <option value="rejeté">Rejeté</option>
+                <option value="livré">Livré</option>
               </select>
               <select
                 value={selectedAgent}

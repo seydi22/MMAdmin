@@ -63,6 +63,10 @@
   background-color: var(--danger-color);
 }
 
+.status-badge-delivered {
+  background-color: #3498db;
+}
+
 .status-badge-default {
   background-color: #6c757d;
 }

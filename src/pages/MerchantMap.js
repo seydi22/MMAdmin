@@ -25,6 +25,7 @@ const getIconByStatus = (status) => {
     'validé': 'marker-icon-valide',
     'en attente': 'marker-icon-en-attente',
     'rejeté': 'marker-icon-rejete',
+    'livré': 'marker-icon-livre',
   };
   return L.divIcon({
     className: `custom-marker-icon ${statusClassName[status] || 'marker-icon-default'}`,
@@ -41,6 +42,7 @@ const MapLegend = () => (
     <div><span className="legend-color-box marker-icon-valide"></span> Validé</div>
     <div><span className="legend-color-box marker-icon-en-attente"></span> En attente</div>
     <div><span className="legend-color-box marker-icon-rejete"></span> Rejeté</div>
+    <div><span className="legend-color-box marker-icon-livre"></span> Livré</div>
   </div>
 );
 
@@ -67,7 +69,7 @@ const MerchantMap = () => {
   const [error, setError] = useState(null);
   
   // --- États (les clés correspondent maintenant aux données réelles) ---
-  const [statusFilter, setStatusFilter] = useState({ 'validé': true, 'en attente': true, 'rejeté': true });
+  const [statusFilter, setStatusFilter] = useState({ 'validé': true, 'en attente': true, 'rejeté': true, 'livré': true });
   const [agentFilter, setAgentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');

@@ -139,6 +139,7 @@ const SupervisorAllMerchants = () => {
             <option value="validé">Validé</option>
             <option value="rejeté">Rejeté</option>
             <option value="assigné">Assigné</option>
+            <option value="livré">Livré</option>
           </select>
         </div>
       </div>
@@ -167,6 +168,7 @@ const SupervisorAllMerchants = () => {
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         merchant.statut === 'validé' ? 'bg-green-100 text-green-800' :
                         merchant.statut === 'rejeté' ? 'bg-red-100 text-red-800' :
+                        merchant.statut === 'livré' ? 'bg-blue-100 text-blue-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
                         {merchant.statut ?? 'Non défini'}
