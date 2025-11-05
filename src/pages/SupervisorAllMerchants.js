@@ -96,6 +96,16 @@ const SupervisorAllMerchants = () => {
     fetchMerchants();
   };
 
+  const formatReadableDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
   // Affichage conditionnel basé sur l'état
   if (isLoading) {
     return (
@@ -156,6 +166,10 @@ const SupervisorAllMerchants = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gérant</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d’enrôlement</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de validation par superviseur</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de validation finale</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de livraison</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -174,6 +188,10 @@ const SupervisorAllMerchants = () => {
                         {merchant.statut ?? 'Non défini'}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{formatReadableDate(merchant.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{formatReadableDate(merchant.supervisorValidationDate)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{formatReadableDate(merchant.finalValidationDate)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{formatReadableDate(merchant.deliveredAt)}</td>
                   </tr>
                 ))}
               </tbody>
