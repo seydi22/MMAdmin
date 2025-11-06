@@ -93,7 +93,7 @@ const MerchantDetail = () => {
               <DetailItem label="Enrôlé par" value={merchant.agentRecruteurId?.matricule} />
               <DetailItem label="Date de validation par superviseur" value={merchant.validatedBySupervisorAt ? new Date(merchant.validatedBySupervisorAt).toLocaleDateString() : 'N/A'} />
               <DetailItem label="Date de validation finale" value={merchant.validatedAt ? new Date(merchant.validatedAt).toLocaleDateString() : 'N/A'} />
-              <DetailItem label="Date de livraison" value={merchant.deliveredAt ? new Date(merchant.deliveredAt).toLocaleDateString() : 'N/A'} />
+              <DetailItem label="Date de livraison" value={merchant.deliveredAt ? new Date(merchant.deliveredAt).toLocaleDateString() : 'en attente de livraison'} />
             </div>
           </div>
 
