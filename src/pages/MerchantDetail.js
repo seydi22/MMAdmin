@@ -31,7 +31,6 @@ const MerchantDetail = () => {
         setMerchant(res.data);
       } catch (err) {
         setError('Erreur lors du chargement des détails du marchand.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -92,6 +91,9 @@ const MerchantDetail = () => {
             </div>
             <div className="card-body-details">
               <DetailItem label="Enrôlé par" value={merchant.agentRecruteurId?.matricule} />
+              <DetailItem label="Date de validation par superviseur" value={merchant.validatedBySupervisorAt ? new Date(merchant.validatedBySupervisorAt).toLocaleDateString() : 'N/A'} />
+              <DetailItem label="Date de validation finale" value={merchant.validatedAt ? new Date(merchant.validatedAt).toLocaleDateString() : 'N/A'} />
+              <DetailItem label="Date de livraison" value={merchant.deliveredAt ? new Date(merchant.deliveredAt).toLocaleDateString() : 'N/A'} />
             </div>
           </div>
 

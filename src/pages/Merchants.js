@@ -158,8 +158,8 @@ const Merchants = () => {
                       <th onClick={() => requestSort('statut')}>Statut</th>
                       <th onClick={() => requestSort('agentRecruteurId')}>Enrôlé par</th>
                       <th onClick={() => requestSort('createdAt')}>Date d’enrôlement</th>
-                      <th onClick={() => requestSort('supervisorValidationDate')}>Date de validation par superviseur</th>
-                      <th onClick={() => requestSort('finalValidationDate')}>Date de validation finale</th>
+                      <th onClick={() => requestSort('validatedBySupervisorAt')}>Date de validation par superviseur</th>
+                      <th onClick={() => requestSort('validatedAt')}>Date de validation finale</th>
                       <th onClick={() => requestSort('deliveredAt')}>Date de livraison</th>
                     </tr>
                   </thead>
@@ -180,8 +180,8 @@ const Merchants = () => {
                         </td>
                         <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
                         <td>{formatReadableDate(merchant.createdAt)}</td>
-                        <td>{formatReadableDate(merchant.supervisorValidationDate)}</td>
-                        <td>{formatReadableDate(merchant.finalValidationDate)}</td>
+                        <td>{formatReadableDate(merchant.validatedBySupervisorAt)}</td>
+                        <td>{formatReadableDate(merchant.validatedAt)}</td>
                         <td>{formatReadableDate(merchant.deliveredAt)}</td>
                       </tr>
                     ))}
