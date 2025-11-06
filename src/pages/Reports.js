@@ -3,6 +3,7 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
 import MerchantsExport from '../components/MerchantsExport'; // Import MerchantsExport
+import SuiviExport from '../components/SuiviExport'; // Import SuiviExport
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './Dashboard.css';
@@ -93,6 +94,13 @@ const Reports = () => {
         <div className="card">
             <div className="card-body">
                 <MerchantsExport />
+            </div>
+        </div>
+
+        {/* Suivi Export Card */}
+        <div className="card mt-4">
+            <div className="card-body">
+                <SuiviExport />
             </div>
         </div>
 
