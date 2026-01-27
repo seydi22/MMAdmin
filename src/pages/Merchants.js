@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
@@ -37,7 +37,7 @@ const Merchants = () => {
     }
   };
 
-  const fetchMerchants = async () => {
+  const fetchMerchants = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -66,7 +66,7 @@ const Merchants = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, searchTerm, selectedAgent, sortConfig]);
 
   useEffect(() => {
     fetchAgents();
@@ -74,7 +74,7 @@ const Merchants = () => {
 
   useEffect(() => {
     fetchMerchants();
-  }, [statusFilter, searchTerm, selectedAgent, sortConfig]);
+  }, [fetchMerchants]);
 
   const requestSort = (key) => {
     let direction = 'ascending';

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserShield, faStore, faUsers, faHourglassHalf, faUserTie, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faStore, faUsers, faHourglassHalf, faUserTie, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/Sidebar';
 import StatsCards from '../components/StatsCards';
 import RecentActivityLogs from '../components/RecentActivityLogs'; // Import the new component

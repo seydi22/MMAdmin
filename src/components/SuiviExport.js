@@ -63,13 +63,13 @@ const SuiviExport = () => {
 
       setSuccess(true);
     } catch (err) {
-      console.error("Erreur lors de l\'exportation :", err.response || err);
+      console.error("Erreur lors de l'exportation :", err.response || err);
       if (err.response && err.response.status === 404) {
-        setError("Aucune donnée trouvée pour l\'exportation.");
+        setError("Aucune donnée trouvée pour l'exportation.");
       } else if (err.response && err.response.data && err.response.data.msg) {
         setError(err.response.data.msg);
       } else {
-        setError("Une erreur est survenue lors de l\'exportation.");
+        setError("Une erreur est survenue lors de l'exportation.");
       }
       setSuccess(false);
     } finally {
