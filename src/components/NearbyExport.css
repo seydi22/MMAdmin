@@ -1,0 +1,69 @@
+.export-container {
+  background-color: var(--color-background-light);
+  padding: var(--spacing-lg);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: var(--spacing-xl);
+}
+
+.export-title {
+  color: var(--color-text-dark);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.export-description {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-lg);
+}
+
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.filter-container .form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 280px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .filter-container .form-group {
+    flex: 0 0 100%;
+  }
+}
+
+.export-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-start;
+  margin-top: var(--spacing-lg);
+}
+
+.export-buttons .btn {
+  min-width: 180px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+  }
+
+  .filter-container .form-group {
+    min-width: 100%;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-buttons .btn {
+    min-width: 100%;
+  }
+}

@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
 import MerchantsExport from '../components/MerchantsExport'; // Import MerchantsExport
 import SuiviExport from '../components/SuiviExport'; // Import SuiviExport
+import NearbyExport from '../components/NearbyExport'; // Import NearbyExport
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './Dashboard.css';
@@ -101,6 +102,13 @@ const Reports = () => {
         <div className="card mt-4">
             <div className="card-body">
                 <SuiviExport />
+            </div>
+        </div>
+
+        {/* Nearby Export Card */}
+        <div className="card mt-4">
+            <div className="card-body">
+                <NearbyExport />
             </div>
         </div>
 
