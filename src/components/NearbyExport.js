@@ -42,12 +42,12 @@ const NearbyExport = () => {
         url += `?${params.toString()}`;
       }
 
-      const generateFileName = () => {
+      const generateFileName = (extension = 'zip') => {
         const now = new Date();
         const date = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
         const time = now.toTimeString().slice(0, 5).replace(':', ''); // HHmm
         const uniqueID = Math.random().toString(36).substring(2, 8); // 6-character random string
-        return `export_nearby_${date}_${time}_${uniqueID}.zip`;
+        return `export_nearby_${date}_${time}_${uniqueID}.${extension}`;
       };
 
       const response = await axios.get(url, {
@@ -65,11 +65,28 @@ const NearbyExport = () => {
         throw new Error(errorData.msg || 'Erreur lors de l\'export');
       }
 
-      // Forcer l'extension .zip et le type MIME application/zip
-      const fileName = generateFileName();
+      // Extraire le nom de fichier depuis Content-Disposition si disponible
+      const contentDisposition = response.headers['content-disposition'] || '';
+      let fileName = null;
+      
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = fileNameMatch[1].replace(/['"]/g, '');
+        }
+      }
 
+      // Si pas de nom de fichier dans Content-Disposition, générer un nom selon le Content-Type
+      if (!fileName) {
+        const isZip = contentType.includes('application/zip');
+        const isExcel = contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        const fileExtension = isZip ? 'zip' : (isExcel ? 'xlsx' : 'zip'); // Par défaut zip si incertain
+        fileName = generateFileName(fileExtension);
+      }
+
+      // Créer le blob avec le bon type MIME
       const blob = new Blob([response.data], { 
-        type: 'application/zip'
+        type: contentType || 'application/zip'
       });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -112,7 +129,7 @@ const NearbyExport = () => {
     <div className="export-container">
       <h3 className="export-title">Export Nearby</h3>
       <p className="export-description">
-        Téléchargez les données des marchands au format ZIP contenant les fichiers Excel avec deux feuilles : "Nearby Item" et "Location Map".
+        Téléchargez les données des marchands. Si ≤ 100 marchands : fichier Excel unique. Si &gt; 100 marchands : fichier ZIP contenant plusieurs fichiers Excel (max 100 marchands par fichier). Chaque fichier Excel contient deux feuilles : "Nearby Item" et "Location Map".
       </p>
 
       <div className="filter-container">
