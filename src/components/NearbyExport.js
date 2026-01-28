@@ -42,12 +42,12 @@ const NearbyExport = () => {
         url += `?${params.toString()}`;
       }
 
-      const generateFileName = (extension = 'zip') => {
+      const generateFileName = () => {
         const now = new Date();
         const date = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
         const time = now.toTimeString().slice(0, 5).replace(':', ''); // HHmm
         const uniqueID = Math.random().toString(36).substring(2, 8); // 6-character random string
-        return `export_nearby_${date}_${time}_${uniqueID}.${extension}`;
+        return `export_nearby_${date}_${time}_${uniqueID}.zip`;
       };
 
       const response = await axios.get(url, {
@@ -65,13 +65,11 @@ const NearbyExport = () => {
         throw new Error(errorData.msg || 'Erreur lors de l\'export');
       }
 
-      // Déterminer l'extension en fonction du type de contenu renvoyé par le backend
-      const isZip = contentType.includes('zip');
-      const fileExtension = isZip ? 'zip' : 'xlsx';
-      const fileName = generateFileName(fileExtension);
+      // Forcer l'extension .zip et le type MIME application/zip
+      const fileName = generateFileName();
 
       const blob = new Blob([response.data], { 
-        type: contentType || (isZip ? 'application/zip' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        type: 'application/zip'
       });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -114,7 +112,7 @@ const NearbyExport = () => {
     <div className="export-container">
       <h3 className="export-title">Export Nearby</h3>
       <p className="export-description">
-        Téléchargez les données des marchands au format Excel avec deux feuilles : "Nearby Item" et "Location Map".
+        Téléchargez les données des marchands au format ZIP contenant les fichiers Excel avec deux feuilles : "Nearby Item" et "Location Map".
       </p>
 
       <div className="filter-container">
