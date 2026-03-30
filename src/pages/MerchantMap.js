@@ -4,6 +4,7 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
+import { formatMerchantStatutLabel, STATUT_REJETE_DEFINITIF } from '../utils/merchantStatus';
 
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -25,6 +26,7 @@ const getIconByStatus = (status) => {
     'validé': 'marker-icon-valide',
     'en attente': 'marker-icon-en-attente',
     'rejeté': 'marker-icon-rejete',
+    [STATUT_REJETE_DEFINITIF]: 'marker-icon-rejete-definitif',
     'livré': 'marker-icon-livre',
   };
   return L.divIcon({
@@ -42,6 +44,7 @@ const MapLegend = () => (
     <div><span className="legend-color-box marker-icon-valide"></span> Validé</div>
     <div><span className="legend-color-box marker-icon-en-attente"></span> En attente</div>
     <div><span className="legend-color-box marker-icon-rejete"></span> Rejeté</div>
+    <div><span className="legend-color-box marker-icon-rejete-definitif"></span> Rejeté définitivement</div>
     <div><span className="legend-color-box marker-icon-livre"></span> Livré</div>
   </div>
 );
@@ -69,7 +72,13 @@ const MerchantMap = () => {
   const [error, setError] = useState(null);
   
   // --- États (les clés correspondent maintenant aux données réelles) ---
-  const [statusFilter, setStatusFilter] = useState({ 'validé': true, 'en attente': true, 'rejeté': true, 'livré': true });
+  const [statusFilter, setStatusFilter] = useState({
+    'validé': true,
+    'en attente': true,
+    'rejeté': true,
+    [STATUT_REJETE_DEFINITIF]: true,
+    'livré': true,
+  });
   const [agentFilter, setAgentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
@@ -108,7 +117,7 @@ const MerchantMap = () => {
 
   const filteredMerchants = useMemo(() => {
     const filtered = merchants
-      .filter(m => statusFilter[m.statut])
+      .filter(m => statusFilter[m.statut] !== false)
       .filter(m => agentFilter === 'all' || m.matricule === agentFilter);
     
     console.log('Marchands après filtrage :', filtered);
@@ -152,7 +161,7 @@ const MerchantMap = () => {
             <Popup>
               <b>{merchant.nom}</b><br />
               Agent (Matricule): {merchant.matricule}<br />
-              Statut: {merchant.statut}
+              Statut: {formatMerchantStatutLabel(merchant.statut)}
             </Popup>
           </Marker>
         ))}
@@ -190,7 +199,7 @@ const MerchantMap = () => {
               {Object.keys(statusFilter).map(statusKey => (
                 <div key={statusKey}>
                   <input type="checkbox" id={`status-${statusKey}`} name={statusKey} checked={statusFilter[statusKey]} onChange={handleStatusChange} />
-                  <label htmlFor={`status-${statusKey}`}>{statusKey.charAt(0).toUpperCase() + statusKey.slice(1)}</label>
+                  <label htmlFor={`status-${statusKey}`}>{formatMerchantStatutLabel(statusKey)}</label>
                 </div>
               ))}
             </div>

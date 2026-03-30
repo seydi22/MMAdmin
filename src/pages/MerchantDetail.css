@@ -25,8 +25,82 @@
 .details-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 2rem;
+}
+
+.details-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.merchant-locked-banner {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #991b1b;
+  font-weight: 500;
+}
+
+.btn-definitive-reject {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  background-color: var(--danger-color);
+  color: #fff;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.btn-definitive-reject:hover:not(:disabled) {
+  background-color: #b02a37;
+}
+
+.btn-definitive-reject:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.status-badge-rejete-definitif {
+  background-color: #7f1d1d;
+}
+
+.modal-definitive-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+}
+
+.modal-definitive-hint {
+  margin: 0 0 1rem;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.modal-definitive-textarea {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-family: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.modal-definitive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
 }
 
 .merchant-name {

@@ -51,6 +51,10 @@ tbody tr:hover {
   background-color: #e74c3c; /* Rejeté (rouge) */
 }
 
+.status-rejete_definitif {
+  background-color: #7f1d1d;
+}
+
 .actions {
   display: flex;
   gap: 10px;

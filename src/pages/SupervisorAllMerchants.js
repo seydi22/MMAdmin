@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FaSpinner, FaSearch, FaFilter } from 'react-icons/fa';
 import Modal from '../components/Modal/Modal';
 import SupervisorMerchantDetail from './SupervisorMerchantDetail';
+import { formatMerchantStatutLabel, isMerchantLockedDefinitive, STATUT_REJETE_DEFINITIF } from '../utils/merchantStatus';
 
 /**
  * Composant pour afficher et gérer tous les commerçants pour un superviseur.
@@ -148,6 +149,7 @@ const SupervisorAllMerchants = () => {
             <option value="en attente">En attente</option>
             <option value="validé">Validé</option>
             <option value="rejeté">Rejeté</option>
+            <option value={STATUT_REJETE_DEFINITIF}>Rejeté définitivement</option>
             <option value="assigné">Assigné</option>
             <option value="livré">Livré</option>
           </select>
@@ -179,13 +181,17 @@ const SupervisorAllMerchants = () => {
                     <td className="px-6 py-4 whitespace-nowrap">{merchant.nomGerant ?? 'Non spécifié'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{merchant.contact ?? 'Non spécifié'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        merchant.statut === 'validé' ? 'bg-green-100 text-green-800' :
-                        merchant.statut === 'rejeté' ? 'bg-red-100 text-red-800' :
-                        merchant.statut === 'livré' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {merchant.statut ?? 'Non défini'}
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          merchant.statut === 'validé' ? 'bg-green-100 text-green-800' :
+                          isMerchantLockedDefinitive(merchant.statut) ? '' :
+                          merchant.statut === 'rejeté' ? 'bg-red-100 text-red-800' :
+                          merchant.statut === 'livré' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}
+                        style={isMerchantLockedDefinitive(merchant.statut) ? { backgroundColor: '#7f1d1d', color: '#fff' } : undefined}
+                      >
+                        {formatMerchantStatutLabel(merchant.statut) || 'Non défini'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">{formatReadableDate(merchant.createdAt)}</td>

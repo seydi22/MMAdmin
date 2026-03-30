@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { FaSpinner, FaCheck, FaTimes, FaCamera, FaIdCard, FaPassport } from 'react-icons/fa';
+import { formatMerchantStatutLabel, isMerchantLockedDefinitive } from '../utils/merchantStatus';
 
 const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -117,12 +118,24 @@ const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
         </div>
         <p><span className="font-semibold">Contact :</span> {merchant.contact}</p>
         <p><span className="font-semibold">Emplacement :</span> {merchant.emplacement}</p>
-        <p><span className="font-semibold">Statut :</span> <span className={`font-semibold ${
-          merchant.statut === 'validé' ? 'text-green-600' :
-          merchant.statut === 'rejeté' ? 'text-red-600' :
-          'text-yellow-600'
-        }`}>{merchant.statut}</span></p>
+        <p><span className="font-semibold">Statut :</span>{' '}
+          <span className={`font-semibold ${
+            merchant.statut === 'validé' ? 'text-green-600' :
+            isMerchantLockedDefinitive(merchant.statut) ? 'text-red-900' :
+            merchant.statut === 'rejeté' ? 'text-red-600' :
+            'text-yellow-600'
+          }`}>{formatMerchantStatutLabel(merchant.statut)}</span>
+        </p>
+        {merchant.rejectionReason && (
+          <p><span className="font-semibold">Motif :</span> {merchant.rejectionReason}</p>
+        )}
       </div>
+
+      {isMerchantLockedDefinitive(merchant.statut) && (
+        <p className="text-center text-red-800 font-semibold mb-4 p-3 bg-red-50 rounded-lg border border-red-200">
+          Cet enrôlement est rejeté définitivement et ne peut plus être modifié ni validé.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <ImageDisplay url={merchant.photoEnseigneUrl} label="Photo de l'enseigne" icon={<FaCamera />} />
@@ -137,7 +150,7 @@ const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
         ) : null}
       </div>
 
-      {merchant.statut === 'en attente' && (
+      {merchant.statut === 'en attente' && !isMerchantLockedDefinitive(merchant.statut) && (
         <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center">
           <button
             onClick={() => updateMerchantStatus('validate')}
@@ -156,7 +169,7 @@ const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
         </div>
       )}
 
-      {showRejectionInput && (
+      {showRejectionInput && merchant.statut === 'en attente' && !isMerchantLockedDefinitive(merchant.statut) && (
         <div className="mt-6 p-4 bg-gray-100 rounded-lg">
           <textarea
             className="w-full p-2 border rounded-md"

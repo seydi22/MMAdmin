@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MerchantsExport from '../components/MerchantsExport';
 import API_BASE_URL from '../config/apiConfig';
+import { formatMerchantStatutLabel, statusBadgeCssSuffix } from '../utils/merchantStatus';
 import './Dashboard.css';
 import './Merchants.css';
 
@@ -126,6 +127,7 @@ const Merchants = () => {
                 <option value="validé_par_superviseur">Validé par superviseur</option>
                 <option value="validé">Validé</option>
                 <option value="rejeté">Rejeté</option>
+                <option value="rejeté_définitivement">Rejeté définitivement</option>
                 <option value="livré">Livré</option>
               </select>
               <select
@@ -174,8 +176,8 @@ const Merchants = () => {
                         <td>{merchant.nomGerant}</td>
                         <td>{merchant.contact}</td>
                         <td>
-                          <span className={`status-badge status-${merchant.statut.replace(' ', '_')}`}>
-                            {merchant.statut}
+                          <span className={`status-badge status-${statusBadgeCssSuffix(merchant.statut)}`}>
+                            {formatMerchantStatutLabel(merchant.statut)}
                           </span>
                         </td>
                         <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>

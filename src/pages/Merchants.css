@@ -31,6 +31,10 @@
   background-color: var(--color-danger);
 }
 
+.status-rejete_definitif {
+  background-color: #7f1d1d;
+}
+
 .status-en_attente {
   background-color: var(--color-warning);
   color: var(--color-text-dark);
@@ -43,4 +47,9 @@
 
 .text-danger {
     color: var(--color-danger);
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 0.95rem;
 }

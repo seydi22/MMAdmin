@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatMerchantStatutLabel, statusBadgeCssSuffix } from '../utils/merchantStatus';
 import './MerchantsTable.css';
 
 const MerchantsTable = ({ merchants, onValidate, onReject }) => {
@@ -33,8 +34,8 @@ const MerchantsTable = ({ merchants, onValidate, onReject }) => {
               {/* Correction 2 : Utilisation de merchant.agentRecruteurId.matricule pour accéder au matricule de l'objet */}
               <td>{merchant.agentRecruteurId.matricule}</td>
               <td>
-                <span className={`status-badge status-${merchant.statut.toLowerCase()}`}>
-                  {merchant.statut}
+                <span className={`status-badge status-${statusBadgeCssSuffix(merchant.statut)}`}>
+                  {formatMerchantStatutLabel(merchant.statut)}
                 </span>
               </td>
               <td className="actions">

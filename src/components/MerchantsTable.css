@@ -55,8 +55,13 @@ tbody tr:hover {
   background-color: #3498db; /* A distinct blue color */
 }
 
+.status-rejete_definitif {
+  background-color: #7f1d1d;
+}
+
 .actions {
   display: flex;
+}
 
 .action-btn {
   background: none;

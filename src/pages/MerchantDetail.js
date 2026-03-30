@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
+import Modal from '../components/Modal/Modal';
 import API_BASE_URL from '../config/apiConfig';
+import {
+  STATUT_REJETE_DEFINITIF,
+  formatMerchantStatutLabel,
+  isMerchantLockedDefinitive,
+  canAdminRejectDefinitive,
+} from '../utils/merchantStatus';
 import './MerchantDetail.css';
 import { FaUser, FaBuilding, FaFileAlt, FaArrowLeft, FaMapMarkerAlt } from 'react-icons/fa';
 import { BiSupport } from 'react-icons/bi';
@@ -14,6 +21,9 @@ const MerchantDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalImage, setModalImage] = useState(null);
+  const [showDefinitiveModal, setShowDefinitiveModal] = useState(false);
+  const [definitiveReason, setDefinitiveReason] = useState('');
+  const [definitiveSubmitting, setDefinitiveSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -40,6 +50,8 @@ const MerchantDetail = () => {
   }, [id]);
 
   const getStatusBadge = (status) => {
+    if (!status) return 'status-badge-default';
+    if (status === STATUT_REJETE_DEFINITIF) return 'status-badge-rejete-definitif';
     switch (status.toLowerCase()) {
       case 'validé':
         return 'status-badge-validated';
@@ -51,6 +63,40 @@ const MerchantDetail = () => {
         return 'status-badge-delivered';
       default:
         return 'status-badge-default';
+    }
+  };
+
+  const refreshMerchant = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const res = await axios.get(`${API_BASE_URL}/api/merchants/${id}`, {
+      headers: { 'x-auth-token': token },
+    });
+    setMerchant(res.data);
+  };
+
+  const handleDefinitiveReject = async () => {
+    const reason = definitiveReason.trim();
+    if (!reason) {
+      alert('La raison du rejet définitif est obligatoire.');
+      return;
+    }
+    setDefinitiveSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${API_BASE_URL}/api/merchants/admin-reject-definitive/${id}`,
+        { rejectionReason: reason },
+        { headers: { 'x-auth-token': token } }
+      );
+      setShowDefinitiveModal(false);
+      setDefinitiveReason('');
+      await refreshMerchant();
+    } catch (err) {
+      const msg = err.response?.data?.msg || err.message || 'Échec du rejet définitif.';
+      alert(msg);
+    } finally {
+      setDefinitiveSubmitting(false);
     }
   };
 
@@ -73,14 +119,33 @@ const MerchantDetail = () => {
           <div>
             <h1 className="merchant-name">{merchant.nom}</h1>
             <div className="header-meta">
-              <span className={`status-badge ${getStatusBadge(merchant.statut)}`}>{merchant.statut}</span>
+              <span className={`status-badge ${getStatusBadge(merchant.statut)}`}>
+                {formatMerchantStatutLabel(merchant.statut)}
+              </span>
               <span>Date d'enrôlement: {new Date(merchant.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
-          <button className="btn-back" onClick={() => navigate('/merchants')}>
-            <FaArrowLeft /> Retour à la liste
-          </button>
+          <div className="details-header-actions">
+            {canAdminRejectDefinitive(merchant.statut) && (
+              <button
+                type="button"
+                className="btn-definitive-reject"
+                onClick={() => setShowDefinitiveModal(true)}
+              >
+                Rejet définitif (admin)
+              </button>
+            )}
+            <button className="btn-back" onClick={() => navigate('/merchants')}>
+              <FaArrowLeft /> Retour à la liste
+            </button>
+          </div>
         </header>
+
+        {isMerchantLockedDefinitive(merchant.statut) && (
+          <div className="merchant-locked-banner" role="status">
+            Cet enrôlement est rejeté définitivement et ne peut plus être modifié ni validé.
+          </div>
+        )}
 
         <div className="details-grid">
           {/* General Info Card */}
@@ -91,6 +156,9 @@ const MerchantDetail = () => {
             </div>
             <div className="card-body-details">
               <DetailItem label="Enrôlé par" value={merchant.agentRecruteurId?.matricule} />
+              {merchant.rejectionReason && (
+                <DetailItem label="Motif de rejet" value={merchant.rejectionReason} />
+              )}
               <DetailItem label="Date de validation par superviseur" value={merchant.validatedBySupervisorAt ? new Date(merchant.validatedBySupervisorAt).toLocaleDateString() : 'N/A'} />
               <DetailItem label="Date de validation finale" value={merchant.validatedAt ? new Date(merchant.validatedAt).toLocaleDateString() : 'N/A'} />
               <DetailItem label="Date de livraison" value={merchant.deliveredAt ? new Date(merchant.deliveredAt).toLocaleDateString() : 'en attente de livraison'} />
@@ -232,6 +300,39 @@ const MerchantDetail = () => {
             </div>
           </div>
         )}
+
+        <Modal isOpen={showDefinitiveModal} onClose={() => !definitiveSubmitting && setShowDefinitiveModal(false)}>
+          <h2 className="modal-definitive-title">Rejet définitif</h2>
+          <p className="modal-definitive-hint">
+            Cette action est irréversible. Indiquez la raison (obligatoire).
+          </p>
+          <textarea
+            value={definitiveReason}
+            onChange={(e) => setDefinitiveReason(e.target.value)}
+            placeholder="Raison du rejet définitif…"
+            rows={4}
+            className="modal-definitive-textarea"
+            disabled={definitiveSubmitting}
+          />
+          <div className="modal-definitive-actions">
+            <button
+              type="button"
+              className="btn-back"
+              disabled={definitiveSubmitting}
+              onClick={() => setShowDefinitiveModal(false)}
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn-definitive-reject"
+              disabled={definitiveSubmitting || !definitiveReason.trim()}
+              onClick={handleDefinitiveReject}
+            >
+              {definitiveSubmitting ? 'Envoi…' : 'Confirmer le rejet définitif'}
+            </button>
+          </div>
+        </Modal>
       </main>
     </div>
   );

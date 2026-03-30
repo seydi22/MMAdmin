@@ -3,6 +3,9 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom'; // Import du hook
+import { formatMerchantStatutLabel, isMerchantLockedDefinitive, statusBadgeCssSuffix } from '../utils/merchantStatus';
+
+const getStatusClass = (statut) => `status-${statusBadgeCssSuffix(statut)}`;
 
 const DossierRow = ({ dossier }) => {
   const navigate = useNavigate(); // Initialisation du hook
@@ -20,11 +23,11 @@ const DossierRow = ({ dossier }) => {
       <td>{new Date(dossier.createdAt).toLocaleDateString()}</td>
       <td>
         <span className={`status-badge ${getStatusClass(dossier.statut)}`}>
-          {dossier.statut}
+          {formatMerchantStatutLabel(dossier.statut)}
         </span>
       </td>
       <td className="actions">
-        {dossier.statut === 'en attente' && (
+        {dossier.statut === 'en attente' && !isMerchantLockedDefinitive(dossier.statut) && (
           <>
             <button className="action-btn validate-btn" title="Valider">
               <FontAwesomeIcon icon={faCheckCircle} />

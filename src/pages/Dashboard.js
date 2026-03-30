@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStore, faUsers, faHourglassHalf, faUserTie, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faStore, faUsers, faHourglassHalf, faUserTie, faCheckCircle, faBan } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/Sidebar';
 import StatsCards from '../components/StatsCards';
 import RecentActivityLogs from '../components/RecentActivityLogs'; // Import the new component
@@ -50,6 +50,7 @@ const Dashboard = () => {
             totalMerchants: merchantStats.stats.total,
             validatedBySupervisor: merchantStats.stats['validé_par_superviseur'],
             livré: merchantStats.stats['livré'],
+            rejeteDefinitif: merchantStats.stats['rejeté_définitivement'] ?? 0,
           });
         } else {
           // Supervisor role
@@ -116,6 +117,11 @@ const Dashboard = () => {
             title="Livré"
             value={stats?.livré || 0}
             icon={<FontAwesomeIcon icon={faCheckCircle} />}
+          />
+          <StatsCards
+            title="Rejeté définitivement"
+            value={stats?.rejeteDefinitif ?? 0}
+            icon={<FontAwesomeIcon icon={faBan} />}
           />
         </div>
 

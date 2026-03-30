@@ -7,6 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal/Modal'; // Assuming you have a Modal component
 import API_BASE_URL from '../config/apiConfig';
+import {
+  formatMerchantStatutLabel,
+  statusBadgeCssSuffix,
+  isMerchantLockedDefinitive,
+} from '../utils/merchantStatus';
 import './Merchants.css';
 
 const AdminValidation = () => {
@@ -122,14 +127,22 @@ const AdminValidation = () => {
                         <td>{merchant.nomGerant}</td>
                         <td>{merchant.contact}</td>
                         <td>
-                          <span className={`status-badge status-${merchant.statut.replace(' ', '_')}`}>
-                            {merchant.statut}
+                          <span className={`status-badge status-${statusBadgeCssSuffix(merchant.statut)}`}>
+                            {formatMerchantStatutLabel(merchant.statut)}
                           </span>
                         </td>
                         <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
-                        <td>
-                          <button onClick={() => handleValidate(merchant._id)} className="btn btn-success btn-sm">Valider</button>
-                          <button onClick={() => openRejectModal(merchant._id)} className="btn btn-danger btn-sm">Rejeter</button>
+                        <td onClick={(e) => e.stopPropagation()}>
+                          {isMerchantLockedDefinitive(merchant.statut) ? (
+                            <span className="text-muted" title="Dossier verrouillé">
+                              —
+                            </span>
+                          ) : (
+                            <>
+                              <button onClick={() => handleValidate(merchant._id)} className="btn btn-success btn-sm">Valider</button>
+                              <button onClick={() => openRejectModal(merchant._id)} className="btn btn-danger btn-sm">Rejeter</button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))}
