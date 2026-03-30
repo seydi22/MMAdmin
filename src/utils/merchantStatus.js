@@ -7,19 +7,28 @@ const STATUTS_ADMIN_REJET_DEFINITIF = new Set([
   'rejeté',
 ]);
 
+const LABELS_PAR_STATUT_NORMALISE = {
+  validé_par_superviseur: 'Validé par superviseur',
+};
+
 export function formatMerchantStatutLabel(statut) {
+  if (!statut) return '';
   if (statut === STATUT_REJETE_DEFINITIF) return 'Rejeté définitivement';
-  return statut ?? '';
+  const key = String(statut).trim().toLowerCase();
+  if (LABELS_PAR_STATUT_NORMALISE[key]) return LABELS_PAR_STATUT_NORMALISE[key];
+  return statut;
 }
 
 export function isMerchantLockedDefinitive(statut) {
-  return statut === STATUT_REJETE_DEFINITIF;
+  if (!statut) return false;
+  return String(statut).trim().toLowerCase() === STATUT_REJETE_DEFINITIF.toLowerCase();
 }
 
 /** L’admin peut appeler POST admin-reject-definitive (hors dossiers déjà validés / livrés / verrouillés). */
 export function canAdminRejectDefinitive(statut) {
   if (!statut || isMerchantLockedDefinitive(statut)) return false;
-  return STATUTS_ADMIN_REJET_DEFINITIF.has(statut);
+  const normalized = String(statut).trim().toLowerCase();
+  return STATUTS_ADMIN_REJET_DEFINITIF.has(normalized);
 }
 
 /** Suffixe stable pour classes CSS (évite les sélecteurs fragiles sur accents). */

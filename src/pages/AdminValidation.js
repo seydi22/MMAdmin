@@ -11,6 +11,7 @@ import {
   formatMerchantStatutLabel,
   statusBadgeCssSuffix,
   isMerchantLockedDefinitive,
+  canAdminRejectDefinitive,
 } from '../utils/merchantStatus';
 import './Merchants.css';
 
@@ -19,8 +20,11 @@ const AdminValidation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDefinitiveModal, setShowDefinitiveModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [definitiveReason, setDefinitiveReason] = useState('');
   const [selectedMerchantId, setSelectedMerchantId] = useState(null);
+  const [definitiveSubmitting, setDefinitiveSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const fetchPendingMerchants = async () => {
@@ -65,11 +69,19 @@ const AdminValidation = () => {
 
   const openRejectModal = (merchantId) => {
     setSelectedMerchantId(merchantId);
+    setShowDefinitiveModal(false);
     setShowModal(true);
   };
 
+  const openDefinitiveModal = (merchantId) => {
+    setSelectedMerchantId(merchantId);
+    setShowModal(false);
+    setDefinitiveReason('');
+    setShowDefinitiveModal(true);
+  };
+
   const handleReject = async () => {
-    if (!rejectionReason) {
+    if (!rejectionReason.trim()) {
       alert('La raison du rejet est obligatoire.');
       return;
     }
@@ -85,7 +97,35 @@ const AdminValidation = () => {
       setRejectionReason('');
       fetchPendingMerchants(); // Refresh the list
     } catch (err) {
+      const msg = err.response?.data?.msg || err.message;
+      alert(msg || 'Erreur lors du rejet du marchand.');
       console.error('Erreur lors du rejet du marchand', err);
+    }
+  };
+
+  const handleDefinitiveReject = async () => {
+    const reason = definitiveReason.trim();
+    if (!reason) {
+      alert('La raison du rejet définitif est obligatoire.');
+      return;
+    }
+    setDefinitiveSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${API_BASE_URL}/api/merchants/admin-reject-definitive/${selectedMerchantId}`,
+        { rejectionReason: reason },
+        { headers: { 'x-auth-token': token } }
+      );
+      setShowDefinitiveModal(false);
+      setDefinitiveReason('');
+      fetchPendingMerchants();
+    } catch (err) {
+      const msg = err.response?.data?.msg || err.message;
+      alert(msg || 'Erreur lors du rejet définitif.');
+      console.error('Erreur lors du rejet définitif', err);
+    } finally {
+      setDefinitiveSubmitting(false);
     }
   };
 
@@ -138,10 +178,19 @@ const AdminValidation = () => {
                               —
                             </span>
                           ) : (
-                            <>
-                              <button onClick={() => handleValidate(merchant._id)} className="btn btn-success btn-sm">Valider</button>
-                              <button onClick={() => openRejectModal(merchant._id)} className="btn btn-danger btn-sm">Rejeter</button>
-                            </>
+                            <div className="admin-validation-actions">
+                              <button type="button" onClick={() => handleValidate(merchant._id)} className="btn btn-success btn-sm">Valider</button>
+                              <button type="button" onClick={() => openRejectModal(merchant._id)} className="btn btn-danger btn-sm">Rejeter</button>
+                              {canAdminRejectDefinitive(merchant.statut) && (
+                                <button
+                                  type="button"
+                                  onClick={() => openDefinitiveModal(merchant._id)}
+                                  className="btn btn-definitive-sm"
+                                >
+                                  Rejet définitif
+                                </button>
+                              )}
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -156,7 +205,8 @@ const AdminValidation = () => {
 
       {showModal && (
         <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-          <h2>Raison du Rejet</h2>
+          <h2>Rejet (renvoi / correction)</h2>
+          <p className="modal-helper-text">Le dossier peut être repris selon le workflow habituel.</p>
           <textarea
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
@@ -164,7 +214,45 @@ const AdminValidation = () => {
             rows="4"
             style={{ width: '100%', marginBottom: '1rem' }}
           />
-          <button onClick={handleReject} className="btn btn-primary">Envoyer</button>
+          <button type="button" onClick={handleReject} className="btn btn-primary">Envoyer</button>
+        </Modal>
+      )}
+
+      {showDefinitiveModal && (
+        <Modal
+          isOpen={showDefinitiveModal}
+          onClose={() => !definitiveSubmitting && setShowDefinitiveModal(false)}
+        >
+          <h2>Rejet définitif</h2>
+          <p className="modal-helper-text">
+            Action irréversible : le dossier ne pourra plus être modifié ni validé.
+          </p>
+          <textarea
+            value={definitiveReason}
+            onChange={(e) => setDefinitiveReason(e.target.value)}
+            placeholder="Raison du rejet définitif (obligatoire)…"
+            rows="4"
+            style={{ width: '100%', marginBottom: '1rem' }}
+            disabled={definitiveSubmitting}
+          />
+          <div className="modal-actions-row">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={definitiveSubmitting}
+              onClick={() => setShowDefinitiveModal(false)}
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn btn-definitive-sm"
+              disabled={definitiveSubmitting || !definitiveReason.trim()}
+              onClick={handleDefinitiveReject}
+            >
+              {definitiveSubmitting ? 'Envoi…' : 'Confirmer le rejet définitif'}
+            </button>
+          </div>
         </Modal>
       )}
     </div>
