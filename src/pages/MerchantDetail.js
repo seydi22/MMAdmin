@@ -295,8 +295,12 @@ const MerchantDetail = () => {
 
         {modalImage && (
           <div className="modal-overlay" onClick={() => setModalImage(null)}>
-            <div className="modal-content-details">
-              <img src={modalImage} alt="Zoomed" />
+            <div
+              className="modal-content-details"
+              onClick={(e) => e.stopPropagation()}
+              role="presentation"
+            >
+              <img src={modalImage} alt="Aperçu agrandi" />
             </div>
           </div>
         )}

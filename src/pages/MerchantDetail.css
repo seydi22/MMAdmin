@@ -278,14 +278,24 @@
 }
 
 .modal-content-details {
-  max-width: 80vw;
-  max-height: 80vh;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0.5rem;
 }
 
+/* Ne pas utiliser width/height 100% : le parent n'a pas de hauteur explicite,
+   ce qui tronquait l'image. Limiter l'image au viewport laisse voir l'intégralité. */
 .modal-content-details img {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 85vh;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  display: block;
 }
 
 /* Responsive Design */
