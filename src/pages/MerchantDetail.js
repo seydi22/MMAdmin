@@ -10,6 +10,7 @@ import {
   isMerchantLockedDefinitive,
   canAdminRejectDefinitive,
 } from '../utils/merchantStatus';
+import { formatRecruiterLabel, getAgentIdFromRecruiterRef } from '../utils/recruiterDisplay';
 import './MerchantDetail.css';
 import { FaUser, FaBuilding, FaFileAlt, FaArrowLeft, FaMapMarkerAlt } from 'react-icons/fa';
 import { BiSupport } from 'react-icons/bi';
@@ -24,6 +25,7 @@ const MerchantDetail = () => {
   const [showDefinitiveModal, setShowDefinitiveModal] = useState(false);
   const [definitiveReason, setDefinitiveReason] = useState('');
   const [definitiveSubmitting, setDefinitiveSubmitting] = useState(false);
+  const [enrolledByLabel, setEnrolledByLabel] = useState('loading');
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -48,6 +50,49 @@ const MerchantDetail = () => {
 
     fetchMerchant();
   }, [id]);
+
+  useEffect(() => {
+    if (!merchant) return;
+    setEnrolledByLabel('loading');
+    const ref = merchant.agentRecruteurId;
+    if (!ref) {
+      setEnrolledByLabel('N/A');
+      return;
+    }
+    if (typeof ref === 'object' && ref !== null) {
+      const fromApi = formatRecruiterLabel(ref);
+      if (fromApi) {
+        setEnrolledByLabel(fromApi);
+        return;
+      }
+    }
+    const agentId = getAgentIdFromRecruiterRef(ref);
+    if (!agentId) {
+      setEnrolledByLabel('N/A');
+      return;
+    }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setEnrolledByLabel('N/A');
+      return;
+    }
+    let cancelled = false;
+    axios
+      .get(`${API_BASE_URL}/api/agents/${agentId}`, {
+        headers: { 'x-auth-token': token },
+      })
+      .then((res) => {
+        if (cancelled) return;
+        setEnrolledByLabel(formatRecruiterLabel(res.data) || 'N/A');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setEnrolledByLabel('N/A');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [merchant]);
 
   const getStatusBadge = (status) => {
     if (!status) return 'status-badge-default';
@@ -155,7 +200,10 @@ const MerchantDetail = () => {
               <h3>Informations générales</h3>
             </div>
             <div className="card-body-details">
-              <DetailItem label="Enrôlé par" value={merchant.agentRecruteurId?.matricule} />
+              <DetailItem
+                label="Enrôlé par"
+                value={enrolledByLabel === 'loading' ? 'Chargement…' : enrolledByLabel}
+              />
               {merchant.rejectionReason && (
                 <DetailItem label="Motif de rejet" value={merchant.rejectionReason} />
               )}
