@@ -19,6 +19,8 @@ const AdminValidation = () => {
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [validatingId, setValidatingId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDefinitiveModal, setShowDefinitiveModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -57,15 +59,28 @@ const AdminValidation = () => {
 
   const handleValidate = async (merchantId) => {
     try {
+      setValidatingId(merchantId);
       const token = localStorage.getItem('token');
-      await axios.post(`${API_BASE_URL}/api/merchants/admin-validate/${merchantId}`, {}, {
+      const resp = await axios.post(`${API_BASE_URL}/api/merchants/admin-validate/${merchantId}`, {}, {
         headers: { 'x-auth-token': token },
       });
+      const merchantName = resp?.data?.merchant?.nom ? ` (${resp.data.merchant.nom})` : '';
+      setSuccessMessage(`Marchand${merchantName} créé sur le SP Portal avec succès.`);
       fetchPendingMerchants(); // Refresh the list
     } catch (err) {
       console.error('Erreur lors de la validation du marchand', err);
+      const msg = err.response?.data?.msg || err.message || 'Erreur lors de la validation.';
+      alert(msg);
+    } finally {
+      setValidatingId(null);
     }
   };
+
+  useEffect(() => {
+    if (!successMessage) return;
+    const t = setTimeout(() => setSuccessMessage(''), 5000);
+    return () => clearTimeout(t);
+  }, [successMessage]);
 
   const openRejectModal = (merchantId) => {
     setSelectedMerchantId(merchantId);
@@ -141,6 +156,12 @@ const AdminValidation = () => {
           <h1>Validation Finale des Marchands</h1>
         </header>
 
+        {successMessage && (
+          <div className="alert-success" role="status">
+            {successMessage}
+          </div>
+        )}
+
         <div className="card">
           <div className="card-body">
             {loading ? (
@@ -179,7 +200,15 @@ const AdminValidation = () => {
                             </span>
                           ) : (
                             <div className="admin-validation-actions">
-                              <button type="button" onClick={() => handleValidate(merchant._id)} className="btn btn-success btn-sm">Valider</button>
+                              <button
+                                type="button"
+                                onClick={() => handleValidate(merchant._id)}
+                                className="btn btn-success btn-sm"
+                                disabled={validatingId === merchant._id}
+                                title={validatingId === merchant._id ? 'Validation en cours…' : 'Valider'}
+                              >
+                                {validatingId === merchant._id ? 'Validation…' : 'Valider'}
+                              </button>
                               <button type="button" onClick={() => openRejectModal(merchant._id)} className="btn btn-danger btn-sm">Rejeter</button>
                               {canAdminRejectDefinitive(merchant.statut) && (
                                 <button

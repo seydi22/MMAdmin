@@ -9,6 +9,7 @@ const STATUTS_ADMIN_REJET_DEFINITIF = new Set([
 
 const LABELS_PAR_STATUT_NORMALISE = {
   validé_par_superviseur: 'Validé par superviseur',
+  cree: 'Créé',
 };
 
 export function formatMerchantStatutLabel(statut) {

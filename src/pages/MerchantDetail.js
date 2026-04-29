@@ -100,6 +100,8 @@ const MerchantDetail = () => {
     switch (status.toLowerCase()) {
       case 'validé':
         return 'status-badge-validated';
+      case 'cree':
+        return 'status-badge-created';
       case 'en attente':
         return 'status-badge-pending';
       case 'rejeté':
@@ -163,6 +165,9 @@ const MerchantDetail = () => {
         <header className="details-header">
           <div>
             <h1 className="merchant-name">{merchant.nom}</h1>
+            <div className="merchant-shortcode">
+              ShortCode: <strong>{merchant.shortCode || '—'}</strong>
+            </div>
             <div className="header-meta">
               <span className={`status-badge ${getStatusBadge(merchant.statut)}`}>
                 {formatMerchantStatutLabel(merchant.statut)}

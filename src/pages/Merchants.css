@@ -27,6 +27,10 @@
   background-color: var(--color-success);
 }
 
+.status-cree {
+  background-color: var(--color-success);
+}
+
 .status-rejeté {
   background-color: var(--color-danger);
 }
@@ -52,6 +56,16 @@
 .text-muted {
   color: #6c757d;
   font-size: 0.95rem;
+}
+
+.alert-success {
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(40, 167, 69, 0.35);
+  background: rgba(40, 167, 69, 0.12);
+  color: #14532d;
+  border-radius: 0.5rem;
+  font-weight: 600;
 }
 
 .admin-validation-actions {

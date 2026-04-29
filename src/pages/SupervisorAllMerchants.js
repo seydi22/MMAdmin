@@ -148,6 +148,7 @@ const SupervisorAllMerchants = () => {
             <option value="all">Tous les statuts</option>
             <option value="en attente">En attente</option>
             <option value="validé">Validé</option>
+            <option value="cree">Créé</option>
             <option value="rejeté">Rejeté</option>
             <option value={STATUT_REJETE_DEFINITIF}>Rejeté définitivement</option>
             <option value="assigné">Assigné</option>

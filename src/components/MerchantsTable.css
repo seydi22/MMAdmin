@@ -43,6 +43,10 @@ tbody tr:hover {
   background-color: #2ecc71;
 }
 
+.status-cree {
+  background-color: #2ecc71;
+}
+
 .status-rejete {
   background-color: #e74c3c;
 }
