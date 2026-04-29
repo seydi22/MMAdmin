@@ -21,6 +21,7 @@ const AdminValidation = () => {
   const [error, setError] = useState(null);
   const [validatingId, setValidatingId] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDefinitiveModal, setShowDefinitiveModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -60,6 +61,7 @@ const AdminValidation = () => {
   const handleValidate = async (merchantId) => {
     try {
       setValidatingId(merchantId);
+      setErrorMessage('');
       const token = localStorage.getItem('token');
       const resp = await axios.post(`${API_BASE_URL}/api/merchants/admin-validate/${merchantId}`, {}, {
         headers: { 'x-auth-token': token },
@@ -70,7 +72,7 @@ const AdminValidation = () => {
     } catch (err) {
       console.error('Erreur lors de la validation du marchand', err);
       const msg = err.response?.data?.msg || err.message || 'Erreur lors de la validation.';
-      alert(msg);
+      setErrorMessage(msg);
     } finally {
       setValidatingId(null);
     }
@@ -159,6 +161,11 @@ const AdminValidation = () => {
         {successMessage && (
           <div className="alert-success" role="status">
             {successMessage}
+          </div>
+        )}
+        {errorMessage && (
+          <div className="alert-error" role="alert">
+            {errorMessage}
           </div>
         )}
 
