@@ -71,8 +71,22 @@ const AdminValidation = () => {
       fetchPendingMerchants(); // Refresh the list
     } catch (err) {
       console.error('Erreur lors de la validation du marchand', err);
-      const msg = err.response?.data?.msg || err.message || 'Erreur lors de la validation.';
-      setErrorMessage(msg);
+      const apiMsg = err.response?.data?.msg;
+      const apiMerchant = err.response?.data?.merchant;
+      const shortCode = apiMerchant?.shortCode;
+      const topOrgOk = String(apiMerchant?.cpsIntegration?.createTopOrg?.resultCode) === '0';
+      const orgOpFailed = String(apiMerchant?.cpsIntegration?.status) === 'failed';
+
+      if (topOrgOk && orgOpFailed) {
+        const sc = shortCode ? ` (ShortCode: ${shortCode})` : '';
+        setErrorMessage(
+          `Top organisation créée avec succès${sc}, mais la création de l’opérateur a échoué. ` +
+          `Tu peux corriger les données opérateur puis cliquer à nouveau sur “Valider” pour retenter uniquement l’opérateur.`
+        );
+      } else {
+        const msg = apiMsg || err.message || 'Erreur lors de la validation.';
+        setErrorMessage(msg);
+      }
     } finally {
       setValidatingId(null);
     }
