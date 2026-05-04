@@ -84,7 +84,7 @@ const MerchantsExport = () => {
     <div className="export-container">
       <h3 className="export-title">Exporter les Données</h3>
       <p className="export-description">
-        Téléchargez des rapports Excel pour les marchands ou leurs opérateurs (seuls les marchands validés sont inclus).
+        Téléchargez des rapports Excel pour les marchands, ou la liste des opérateurs à créer manuellement (quand la création automatique a échoué / a été ignorée).
       </p>
 
       <div className="filter-container">
@@ -123,7 +123,7 @@ const MerchantsExport = () => {
           className="btn btn-secondary"
           disabled={loading}
         >
-          {loading ? 'Exportation...' : 'Exporter les Opérateurs'}
+          {loading ? 'Exportation...' : 'Exporter les Opérateurs (manuel)'}
         </button>
       </div>
 
