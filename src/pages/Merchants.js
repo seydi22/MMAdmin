@@ -162,7 +162,7 @@ const Merchants = () => {
                       <th onClick={() => requestSort('agentRecruteurId')}>Enrôlé par</th>
                       <th onClick={() => requestSort('createdAt')}>Date d’enrôlement</th>
                       <th onClick={() => requestSort('validatedBySupervisorAt')}>Date de validation par superviseur</th>
-                      <th onClick={() => requestSort('validatedAt')}>Date de validation finale</th>
+                      <th onClick={() => requestSort('creationDate')}>Date de création</th>
                       <th onClick={() => requestSort('deliveredAt')}>Date de livraison</th>
                     </tr>
                   </thead>
@@ -173,7 +173,7 @@ const Merchants = () => {
                         onClick={() => handleMerchantClick(merchant._id)}
                         className="merchant-row"
                       >
-                        <td>{merchant.nom}</td>
+                        <td>{merchant.displayName || merchant.nom}</td>
                         <td>{merchant.nomGerant}</td>
                         <td>{merchant.contact}</td>
                         <td>
@@ -184,7 +184,7 @@ const Merchants = () => {
                         <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
                         <td>{formatReadableDate(merchant.createdAt)}</td>
                         <td>{formatReadableDate(merchant.validatedBySupervisorAt)}</td>
-                        <td>{formatReadableDate(merchant.validatedAt)}</td>
+                        <td>{formatReadableDate(merchant.creationDate)}</td>
                         <td>{formatReadableDate(merchant.deliveredAt)}</td>
                       </tr>
                     ))}
