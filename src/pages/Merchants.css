@@ -1,120 +1,36 @@
-/* src/pages/Merchants.css */
-
-.filters-container {
+.merchants-filters { display:flex; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap; align-items:center; }
+.merchants-filters input, .merchants-filters select { padding:0.55rem 0.75rem; border:1px solid #d1d5db; border-radius:8px; min-width:220px; }
+.page-size-label { display:flex; align-items:center; gap:0.5rem; color:#374151; font-size:0.9rem; }
+.page-size-label select { min-width:80px; }
+.merchants-error { background:#fef2f2; color:#b91c1c; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1rem; }
+.merchants-loading { padding:1.5rem; text-align:center; color:#6b7280; }
+.merchants-table { width:100%; border-collapse:collapse; }
+.merchants-table th, .merchants-table td { padding:0.75rem; border-bottom:1px solid #e5e7eb; text-align:left; }
+.merchants-table th { background:#f9fafb; font-weight:600; }
+.btn-details, .btn-validate, .btn-reject { border:none; border-radius:6px; padding:0.4rem 0.7rem; margin-right:0.35rem; cursor:pointer; font-size:0.875rem; }
+.btn-details { background:#e5e7eb; color:#111827; }
+.btn-validate { background:#16a34a; color:#fff; }
+.btn-reject { background:#dc2626; color:#fff; }
+.actions-cell { white-space:nowrap; }
+.reject-inline { display:inline-flex; gap:0.35rem; align-items:center; margin-top:0.35rem; }
+.reject-inline input { padding:0.35rem 0.5rem; border:1px solid #d1d5db; border-radius:6px; }
+.table-responsive { overflow-x:auto; }
+.status-badge { display:inline-block; padding:0.2rem 0.55rem; border-radius:999px; font-size:0.8rem; background:#e5e7eb; }
+.merchants-pagination {
   display: flex;
-  gap: var(--spacing-md);
-}
-
-.merchant-row {
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.merchant-row:hover {
-  background-color: var(--color-background-grey);
-}
-
-.status-badge {
-  padding: 0.3rem 0.8rem;
-  border-radius: 1rem;
-  font-size: 0.85em;
-  font-weight: bold;
-  color: #ffffff;
-  text-transform: capitalize;
-}
-
-.status-validé {
-  background-color: var(--color-success);
-}
-
-.status-cree {
-  background-color: var(--color-success);
-}
-
-.status-rejeté {
-  background-color: var(--color-danger);
-}
-
-.status-rejete_definitif {
-  background-color: #7f1d1d;
-}
-
-.status-en_attente {
-  background-color: var(--color-warning);
-  color: var(--color-text-dark);
-}
-
-.status-validé_par_superviseur {
-  background-color: var(--color-warning);
-  color: var(--color-text-dark);
-}
-
-.text-danger {
-    color: var(--color-danger);
-}
-
-.text-muted {
-  color: #6c757d;
-  font-size: 0.95rem;
-}
-
-.alert-success {
-  padding: 0.9rem 1.1rem;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(40, 167, 69, 0.35);
-  background: rgba(40, 167, 69, 0.12);
-  color: #14532d;
-  border-radius: 0.5rem;
-  font-weight: 600;
-}
-
-.alert-error {
-  padding: 0.9rem 1.1rem;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(220, 53, 69, 0.35);
-  background: rgba(220, 53, 69, 0.12);
-  color: #7f1d1d;
-  border-radius: 0.5rem;
-  font-weight: 600;
-}
-
-.admin-validation-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  justify-content: space-between;
   align-items: center;
-}
-
-.btn-definitive-sm {
-  color: #fff;
-  background-color: #7f1d1d;
-  border: 1px solid #7f1d1d;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-  border-radius: 0.2rem;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-definitive-sm:hover:not(:disabled) {
-  background-color: #671a1a;
-  border-color: #671a1a;
-}
-
-.btn-definitive-sm:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.modal-helper-text {
-  margin: 0 0 1rem;
-  color: #555;
-  font-size: 0.95rem;
-}
-
-.modal-actions-row {
-  display: flex;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid #e5e7eb;
 }
+.pagination-info { color: #6b7280; font-size: 0.9rem; }
+.pagination-controls { display: flex; align-items: center; gap: 0.5rem; }
+.pagination-page { font-weight: 600; min-width: 7rem; text-align: center; }
+.merchants-pagination { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; padding:0.85rem 1rem; border-top:1px solid #e5e7eb; }
+.pagination-info { color:#6b7280; font-size:0.9rem; }
+.pagination-controls { display:flex; align-items:center; gap:0.75rem; }
+.pagination-controls button { border:1px solid #d1d5db; background:#fff; border-radius:6px; padding:0.4rem 0.75rem; cursor:pointer; }
+.pagination-controls button:disabled { opacity:0.45; cursor:not-allowed; }
+.pagination-page { font-size:0.9rem; color:#111827; }

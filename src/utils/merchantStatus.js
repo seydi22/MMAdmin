@@ -8,8 +8,12 @@ const STATUTS_ADMIN_REJET_DEFINITIF = new Set([
 ]);
 
 const LABELS_PAR_STATUT_NORMALISE = {
+  'en attente': 'En validation terrain',
   validé_par_superviseur: 'Validé par superviseur',
   cree: 'Créé',
+  validé: 'Créé',
+  rejeté: 'À corriger',
+  livré: 'Livré',
 };
 
 export function formatMerchantStatutLabel(statut) {

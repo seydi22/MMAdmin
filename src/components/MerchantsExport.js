@@ -84,12 +84,12 @@ const MerchantsExport = () => {
     <div className="export-container">
       <h3 className="export-title">Exporter les Données</h3>
       <p className="export-description">
-        Téléchargez des rapports Excel pour les marchands, ou la liste des opérateurs à créer manuellement (quand la création automatique a échoué / a été ignorée).
+        Marchands déjà créés dans Moov Money, après la validation finale. Le fichier marchands et le fichier opérateurs gardent le format d’import actuel. Les opérateurs exportés sont ceux à créer à la main.
       </p>
 
       <div className="filter-container">
         <div className="form-group">
-          <label htmlFor="startDate">Date de début de validation</label>
+          <label htmlFor="startDate">Début de validation finale</label>
           <DatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
@@ -99,7 +99,7 @@ const MerchantsExport = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="endDate">Date de fin de validation</label>
+          <label htmlFor="endDate">Fin de validation finale</label>
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}

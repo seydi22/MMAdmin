@@ -12,6 +12,7 @@ const SuiviExport = () => {
   const [success, setSuccess] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [statut, setStatut] = useState('');
 
   const handleExport = async () => {
     setLoading(true);
@@ -29,6 +30,7 @@ const SuiviExport = () => {
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', new Date(startDate).toISOString());
       if (endDate) params.append('endDate', new Date(endDate).toISOString());
+      if (statut) params.append('statut', statut);
 
       if (params.toString()) {
         url += `?${params.toString()}`;
@@ -81,12 +83,29 @@ const SuiviExport = () => {
     <div className="export-container">
       <h3 className="export-title">Export Suivi Marchands</h3>
       <p className="export-description">
-        Téléchargez le rapport de suivi des marchands validés.
+        Suivi du circuit : enrôlement, étape SAM, CAM ou PAM, validation finale, création et livraison. Le fichier indique l’équipe, ses deux membres, le SAM, le CAM et le PAM de chaque dossier.
       </p>
 
       <div className="filter-container">
         <div className="form-group">
-          <label htmlFor="startDate">Date de début d\'enrôlement</label>
+          <label htmlFor="suiviStatut">Étape</label>
+          <select
+            id="suiviStatut"
+            className="form-control"
+            value={statut}
+            onChange={(event) => setStatut(event.target.value)}
+          >
+            <option value="">Tout le circuit</option>
+            <option value="en attente">En validation terrain</option>
+            <option value="rejeté">À corriger</option>
+            <option value="validé_par_superviseur">Validé par superviseur</option>
+            <option value="cree">Créé</option>
+            <option value="livré">Livré</option>
+            <option value="rejeté_définitivement">Rejeté définitivement</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="startDate">Début d&apos;enrôlement</label>
           <DatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
@@ -96,7 +115,7 @@ const SuiviExport = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="endDate">Date de fin d\'enrôlement</label>
+          <label htmlFor="endDate">Fin d&apos;enrôlement</label>
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}

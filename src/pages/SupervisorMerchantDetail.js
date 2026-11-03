@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { FaSpinner, FaCheck, FaTimes, FaCamera, FaIdCard, FaPassport } from 'react-icons/fa';
 import { formatMerchantStatutLabel, isMerchantLockedDefinitive } from '../utils/merchantStatus';
+import API_BASE_URL from '../config/apiConfig';
 
 const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,7 +11,7 @@ const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionInput, setShowRejectionInput] = useState(false);
 
-  const API_URL = 'http://localhost:5000/api/merchants';
+  const API_URL = `${API_BASE_URL}/api/merchants`;
 
   // Fonction pour mettre à jour le statut du commerçant
   const updateMerchantStatus = async (action) => {
@@ -26,20 +27,18 @@ const SupervisorMerchantDetail = ({ merchant, onStatusUpdate }) => {
       }
 
       let body = {};
-      let url = `${API_URL}/${merchant._id}/validate`;
+      let url;
       let method = 'POST';
 
       if (action === 'validate') {
-        url = `${API_URL}/${merchant._id}/validate`;
-        method = 'POST';
+        url = `${API_URL}/supervisor-validate/${merchant._id}`;
       } else if (action === 'reject') {
         if (!rejectionReason) {
           setErrorMessage('Veuillez indiquer une raison de rejet.');
           setIsLoading(false);
           return;
         }
-        url = `${API_URL}/${merchant._id}/reject`;
-        method = 'POST';
+        url = `${API_URL}/reject/${merchant._id}`;
         body = { rejectionReason };
       } else {
         setErrorMessage('Action non reconnue.');

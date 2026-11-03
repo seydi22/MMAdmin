@@ -13,22 +13,35 @@ import './Reports.css';
 const Reports = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [teams, setTeams] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState('');
-  const [agents, setAgents] = useState([]);
-  const [selectedAgent, setSelectedAgent] = useState('');
+  const [org, setOrg] = useState({ pams: [], eams: [], users: [] });
+  const [selectedPam, setSelectedPam] = useState('');
+  const [selectedSam, setSelectedSam] = useState('');
+  const [selectedEam, setSelectedEam] = useState('');
+  const [exportError, setExportError] = useState('');
+
+  const idOf = (value) => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    return String(value._id || value);
+  };
+
+  const personLabel = (user) => {
+    if (!user) return '';
+    const name = [user.prenom, user.nom].filter(Boolean).join(' ').trim();
+    return name ? `${name} (${user.matricule})` : user.matricule;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem('token');
       const config = { headers: { 'x-auth-token': token } };
       try {
-        const [supervisorsRes, agentsRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/agents/all-supervisors`, config),
-          axios.get(`${API_BASE_URL}/api/agents/all-agents`, config),
-        ]);
-        setTeams(supervisorsRes.data);
-        setAgents(agentsRes.data);
+        const orgRes = await axios.get(`${API_BASE_URL}/api/organization`, config);
+        setOrg({
+          pams: orgRes.data?.pams || [],
+          eams: orgRes.data?.eams || [],
+          users: orgRes.data?.users || [],
+        });
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -36,7 +49,19 @@ const Reports = () => {
     fetchData();
   }, []);
 
+  const visibleSams = org.users.filter((user) => {
+    if (user.role !== 'sam') return false;
+    if (!selectedPam) return true;
+    return idOf(user.pamId) === selectedPam;
+  });
+  const visibleEams = org.eams.filter((eam) => {
+    if (selectedSam) return idOf(eam.samId) === selectedSam;
+    if (selectedPam) return idOf(eam.pamId) === selectedPam;
+    return true;
+  });
+
   const handleExport = async () => {
+    setExportError('');
     const token = localStorage.getItem('token');
     if (!token) {
       console.error("No token found");
@@ -45,10 +70,18 @@ const Reports = () => {
     }
 
     const params = new URLSearchParams();
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
-    if (selectedTeam) params.append('teamId', selectedTeam);
-    if (selectedAgent) params.append('agentId', selectedAgent);
+    const day = (value, end) => {
+      if (!value) return '';
+      const date = new Date(value);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const number = String(date.getDate()).padStart(2, '0');
+      return `${date.getFullYear()}-${month}-${number}${end ? 'T23:59:59' : 'T00:00:00'}`;
+    };
+    if (startDate) params.append('startDate', day(startDate, false));
+    if (endDate) params.append('endDate', day(endDate, true));
+    if (selectedPam) params.append('pamId', selectedPam);
+    if (selectedSam) params.append('teamId', selectedSam);
+    if (selectedEam) params.append('eamId', selectedEam);
 
     try {
       const res = await axios.get(`${API_BASE_URL}/api/export/performance`, {
@@ -79,7 +112,7 @@ const Reports = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting performance data:', error);
-      // Handle error, e.g., show a notification to the user
+      setExportError('L’export des performances a échoué.');
     }
   };
 
@@ -115,9 +148,12 @@ const Reports = () => {
         {/* Performance Export Card */}
         <div className="card mt-4">
           <div className="card-header">
-            <h3>Exporter les Performances</h3>
+            <h3>Performances du terrain</h3>
           </div>
           <div className="card-body">
+            <p className="export-description">
+              Enrôlements des équipes, regroupés par équipe et par SAM. Le filtre suit PAM, SAM, puis équipe.
+            </p>
             <div className="filters-container">
               <div className="form-group">
                 <label>Date de début</label>
@@ -138,36 +174,53 @@ const Reports = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Équipe (Superviseur)</label>
+                <label>PAM</label>
                 <select
-                  value={selectedTeam}
-                  onChange={(e) => setSelectedTeam(e.target.value)}
+                  value={selectedPam}
+                  onChange={(event) => {
+                    setSelectedPam(event.target.value);
+                    setSelectedSam('');
+                    setSelectedEam('');
+                  }}
                   className="form-control"
                 >
-                  <option value="">Toutes les équipes</option>
-                  {teams.map((team) => (
-                    <option key={team._id} value={team._id}>
-                      {team.nom}
-                    </option>
+                  <option value="">Tous les PAM</option>
+                  {org.pams.map((pam) => (
+                    <option key={pam._id} value={pam._id}>{pam.nom}</option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
-                <label>Agent</label>
+                <label>SAM</label>
                 <select
-                  value={selectedAgent}
-                  onChange={(e) => setSelectedAgent(e.target.value)}
+                  value={selectedSam}
+                  onChange={(event) => {
+                    setSelectedSam(event.target.value);
+                    setSelectedEam('');
+                  }}
                   className="form-control"
                 >
-                  <option value="">Tous les agents</option>
-                  {agents.map((agent) => (
-                    <option key={agent._id} value={agent._id}>
-                      {agent.nom} ({agent.matricule})
-                    </option>
+                  <option value="">Tous les SAM</option>
+                  {visibleSams.map((sam) => (
+                    <option key={sam._id} value={sam._id}>{personLabel(sam)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Équipe</label>
+                <select
+                  value={selectedEam}
+                  onChange={(event) => setSelectedEam(event.target.value)}
+                  className="form-control"
+                >
+                  <option value="">Toutes les équipes</option>
+                  {visibleEams.map((eam) => (
+                    <option key={eam._id} value={eam._id}>{eam.nom}</option>
                   ))}
                 </select>
               </div>
             </div>
+            {exportError && <div className="alert alert-danger">{exportError}</div>}
             <button onClick={handleExport} className="btn btn-primary">
               Exporter en Excel
             </button>

@@ -63,9 +63,10 @@ const RecentActivityLogs = () => {
         {logs.map(log => (
           <li key={log._id} className="list-group-item">
             <div className="d-flex justify-content-between">
-              <span>{log.action}</span>
+              <span>{log.matricule} · {log.action}</span>
               <span className="text-muted">{formatRelativeTime(log.createdAt)}</span>
             </div>
+            {log.cible && <div className="text-muted">{log.cible}</div>}
           </li>
         ))}
       </ul>

@@ -129,7 +129,7 @@ const NearbyExport = () => {
     <div className="export-container">
       <h3 className="export-title">Export Nearby</h3>
       <p className="export-description">
-        Téléchargez les données des marchands. Si ≤ 100 marchands : fichier Excel unique. Si &gt; 100 marchands : fichier ZIP contenant plusieurs fichiers Excel (max 100 marchands par fichier). Chaque fichier Excel contient deux feuilles : "Nearby Item" et "Location Map".
+        Fichier Nearby des marchands créés après la validation finale. Le format d’import reste celui attendu par Moov. Jusqu’à 100 marchands : un Excel. Au-delà : un ZIP, avec les feuilles Nearby Item et Location Map.
       </p>
 
       <div className="filter-container">

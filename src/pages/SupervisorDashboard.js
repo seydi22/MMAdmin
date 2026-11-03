@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSpinner, FaPlus, FaCheck, FaTimes } from 'react-icons/fa';
-import axios from 'axios'; // Importez axios pour les requêtes HTTP
-import './SupervisorDashboard.css'; // Assurez-vous d'avoir un fichier CSS pour le style
+import axios from 'axios';
+import API_BASE_URL from '../config/apiConfig';
+import './SupervisorDashboard.css';
 
 const SupervisorDashboard = () => {
   const [dashboardData, setDashboardData] = useState({
-    stats: { 'en attente': 0, 'validé': 0, 'rejeté': 0 },
+    stats: { 'en attente': 0, 'cree': 0, 'rejeté': 0 },
     pendingMerchants: [],
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +18,7 @@ const SupervisorDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
-    navigate('/login'); // Redirige vers la page de connexion
+    navigate('/login');
   };
 
   // Fonction pour récupérer les données du tableau de bord
@@ -32,7 +33,7 @@ const SupervisorDashboard = () => {
         return;
       }
       try {
-        const response = await axios.get('http://localhost:5000/api/merchants/dashboard-stats', {
+        const response = await axios.get(`${API_BASE_URL}/api/merchants/dashboard-stats`, {
           headers: {
             'x-auth-token': token,
           },
@@ -75,8 +76,8 @@ const SupervisorDashboard = () => {
               <p className="stat-value pending">{pendingMerchantsCount}</p>
             </div>
             <div className="stat-card">
-              <h3 className="stat-title">Validé</h3>
-              <p className="stat-value validated">{dashboardData.stats.validé}</p>
+              <h3 className="stat-title">Créés</h3>
+              <p className="stat-value validated">{dashboardData.stats?.cree || 0}</p>
             </div>
             <div className="stat-card">
               <h3 className="stat-title">Rejeté</h3>

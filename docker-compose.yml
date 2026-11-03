@@ -1,0 +1,13 @@
+# Portail d'administration. Le backend Docker doit déjà écouter sur le port 5000
+# de cette machine. nginx relaie /api et /uploads vers ce port.
+
+services:
+  portail:
+    build: .
+    image: pnam-portail
+    container_name: pnam-portail
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

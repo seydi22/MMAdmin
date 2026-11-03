@@ -20,17 +20,27 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// --- Logique des icônes (basée sur les données réelles "validé") ---
+const MAP_STATUSES = [
+  'en attente',
+  'validé_par_superviseur',
+  'cree',
+  'rejeté',
+  'livré',
+  STATUT_REJETE_DEFINITIF,
+];
+
+const STATUS_MARKER = {
+  'en attente': 'marker-icon-en-attente',
+  'validé_par_superviseur': 'marker-icon-superviseur',
+  'cree': 'marker-icon-valide',
+  'rejeté': 'marker-icon-rejete',
+  'livré': 'marker-icon-livre',
+  [STATUT_REJETE_DEFINITIF]: 'marker-icon-rejete-definitif',
+};
+
 const getIconByStatus = (status) => {
-  const statusClassName = {
-    'validé': 'marker-icon-valide',
-    'en attente': 'marker-icon-en-attente',
-    'rejeté': 'marker-icon-rejete',
-    [STATUT_REJETE_DEFINITIF]: 'marker-icon-rejete-definitif',
-    'livré': 'marker-icon-livre',
-  };
   return L.divIcon({
-    className: `custom-marker-icon ${statusClassName[status] || 'marker-icon-default'}`,
+    className: `custom-marker-icon ${STATUS_MARKER[status] || 'marker-icon-default'}`,
     html: '<div></div>',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
@@ -41,11 +51,12 @@ const getIconByStatus = (status) => {
 const MapLegend = () => (
   <div className="map-legend">
     <h4>Légende</h4>
-    <div><span className="legend-color-box marker-icon-valide"></span> Validé</div>
-    <div><span className="legend-color-box marker-icon-en-attente"></span> En attente</div>
-    <div><span className="legend-color-box marker-icon-rejete"></span> Rejeté</div>
-    <div><span className="legend-color-box marker-icon-rejete-definitif"></span> Rejeté définitivement</div>
-    <div><span className="legend-color-box marker-icon-livre"></span> Livré</div>
+    {MAP_STATUSES.map((status) => (
+      <div key={status}>
+        <span className={`legend-color-box ${STATUS_MARKER[status]}`}></span>
+        {formatMerchantStatutLabel(status)}
+      </div>
+    ))}
   </div>
 );
 
@@ -72,13 +83,9 @@ const MerchantMap = () => {
   const [error, setError] = useState(null);
   
   // --- États (les clés correspondent maintenant aux données réelles) ---
-  const [statusFilter, setStatusFilter] = useState({
-    'validé': true,
-    'en attente': true,
-    'rejeté': true,
-    [STATUT_REJETE_DEFINITIF]: true,
-    'livré': true,
-  });
+  const [statusFilter, setStatusFilter] = useState(() => (
+    Object.fromEntries(MAP_STATUSES.map((status) => [status, true]))
+  ));
   const [agentFilter, setAgentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
@@ -97,10 +104,13 @@ const MerchantMap = () => {
           headers: { 'x-auth-token': token },
         });
         
-        // --- PLUS DE DONNÉES SIMULÉES ---
-        // On utilise directement les données du backend.
-        console.log('Données réelles reçues du backend :', response.data);
-        setMerchants(response.data);
+        const points = (response.data || [])
+          .filter((merchant) => merchant.lat != null && merchant.lng != null)
+          .map((merchant) => ({
+            ...merchant,
+            statut: merchant.statut === 'validé' ? 'cree' : merchant.statut,
+          }));
+        setMerchants(points);
 
       } catch (err) {
         setError(err.response?.data?.msg || err.message || 'Une erreur est survenue.');
@@ -117,10 +127,8 @@ const MerchantMap = () => {
 
   const filteredMerchants = useMemo(() => {
     const filtered = merchants
-      .filter(m => statusFilter[m.statut] !== false)
-      .filter(m => agentFilter === 'all' || m.matricule === agentFilter);
-    
-    console.log('Marchands après filtrage :', filtered);
+      .filter((merchant) => statusFilter[merchant.statut] !== false)
+      .filter((merchant) => agentFilter === 'all' || merchant.matricule === agentFilter);
     return filtered;
 
   }, [merchants, statusFilter, agentFilter]);
@@ -160,7 +168,7 @@ const MerchantMap = () => {
           >
             <Popup>
               <b>{merchant.nom}</b><br />
-              Agent (Matricule): {merchant.matricule}<br />
+              AAM : {merchant.matricule}<br />
               Statut: {formatMerchantStatutLabel(merchant.statut)}
             </Popup>
           </Marker>
@@ -174,7 +182,7 @@ const MerchantMap = () => {
       <Sidebar />
       <main className="main-content">
         <header className="main-header">
-          <h1>Carte des Marchands</h1>
+          <h1>Carte marchand</h1>
         </header>
         <div className="merchant-map-page-container">
           <div className="map-controls-panel">
@@ -196,7 +204,7 @@ const MerchantMap = () => {
             </div>
             <div className="control-group">
               <label>Filtrer par statut :</label>
-              {Object.keys(statusFilter).map(statusKey => (
+              {MAP_STATUSES.map((statusKey) => (
                 <div key={statusKey}>
                   <input type="checkbox" id={`status-${statusKey}`} name={statusKey} checked={statusFilter[statusKey]} onChange={handleStatusChange} />
                   <label htmlFor={`status-${statusKey}`}>{formatMerchantStatutLabel(statusKey)}</label>
@@ -205,10 +213,10 @@ const MerchantMap = () => {
             </div>
             {hasAgentData && agentMatricules.length > 2 && (
               <div className="control-group">
-                <label htmlFor="agent-select">Filtrer par agent (matricule) :</label>
+                <label htmlFor="agent-select">Filtrer par AAM :</label>
                 <select id="agent-select" value={agentFilter} onChange={e => setAgentFilter(e.target.value)}>
                   {agentMatricules.map(name => (
-                    <option key={name} value={name}>{name === 'all' ? 'Tous les agents' : name}</option>
+                    <option key={name} value={name}>{name === 'all' ? 'Tous les AAM' : name}</option>
                   ))}
                 </select>
               </div>

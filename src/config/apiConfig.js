@@ -1,14 +1,11 @@
 /**
- * Définit l'URL de base pour tous les appels API de l'application.
- *
- * Il tente de lire la variable d'environnement `REACT_APP_API_URL`,
- * qui est configurée dans les environnements de déploiement (comme Vercel).
- *
- * Si la variable n'est pas trouvée, il utilise une URL par défaut
- * pour le développement en local.
- *
- * @type {string}
+ * URL du backend, sans `/api` à la fin.
+ * Vide : le portail appelle la même adresse que la page (nginx relaie vers le backend).
+ * Absente : poste de développement, http://localhost:5000.
  */
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const configured = process.env.REACT_APP_API_URL;
+const API_BASE_URL = configured == null
+  ? 'http://localhost:5000'
+  : String(configured).replace(/\/$/, '');
 
 export default API_BASE_URL;

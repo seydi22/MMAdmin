@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaSpinner } from 'react-icons/fa';
+import API_BASE_URL from '../config/apiConfig';
 
 const SupervisorAgentPerformance = () => {
   const [agentsPerformance, setAgentsPerformance] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const API_URL = 'http://localhost:5000/api/agents/all-performance';
+  const API_URL = `${API_BASE_URL}/api/agents/all-performance`;
 
   const fetchAllAgentsPerformance = async () => {
     setIsLoading(true);

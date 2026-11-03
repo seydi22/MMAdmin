@@ -1,0 +1,150 @@
+.antifraude-page .antifraude-intro {
+  max-width: 860px;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.antifraude-page .antifraude-alert {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #9b1c1c;
+}
+
+.antifraude-page .antifraude-filtre {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  max-width: 220px;
+  margin-bottom: 1rem;
+}
+
+.antifraude-page .antifraude-layout {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.antifraude-page .antifraude-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.antifraude-page .antifraude-table th,
+.antifraude-page .antifraude-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--color-border, #e6e6e6);
+  text-align: left;
+}
+
+.antifraude-page .antifraude-table tbody tr {
+  cursor: pointer;
+}
+
+.antifraude-page .antifraude-table td span {
+  display: block;
+  margin-top: 0.15rem;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.antifraude-page .antifraude-table tbody tr.is-active {
+  background: #fff4ee;
+}
+
+.antifraude-page .antifraude-revue {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.antifraude-page .antifraude-revue h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.antifraude-page .antifraude-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.antifraude-page .antifraude-pair article {
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.antifraude-page .antifraude-pair h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.antifraude-page .antifraude-statut {
+  margin: 0.2rem 0 0.6rem;
+  color: #005BAC;
+  font-weight: 600;
+}
+
+.antifraude-page .antifraude-motif {
+  margin: 0 0 0.85rem;
+  line-height: 1.45;
+}
+
+.antifraude-page .antifraude-pair dl {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 0.8rem;
+}
+
+.antifraude-page .antifraude-pair dl div {
+  display: grid;
+  grid-template-columns: 6.2rem 1fr;
+  gap: 0.4rem;
+}
+
+.antifraude-page .antifraude-pair dt {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.antifraude-page .antifraude-pair dd {
+  margin: 0;
+}
+
+.antifraude-page .antifraude-pair figure {
+  margin: 0 0 0.7rem;
+}
+
+.antifraude-page .antifraude-pair figcaption {
+  margin-bottom: 0.3rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.antifraude-page .antifraude-pair figure.is-focus {
+  outline: 2px solid #F16522;
+  border-radius: 8px;
+  padding: 0.35rem;
+}
+
+.antifraude-page .antifraude-pair img {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  background: #f4f4f4;
+  border-radius: 8px;
+}
+
+.antifraude-page .antifraude-pair a {
+  color: #005BAC;
+}
+
+@media (max-width: 960px) {
+  .antifraude-page .antifraude-pair {
+    grid-template-columns: 1fr;
+  }
+}

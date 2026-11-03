@@ -1,0 +1,152 @@
+.rem-settings-page .rem-subtitle {
+  margin: 0.25rem 0 1rem;
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+.rem-card {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.rem-card h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.15rem;
+}
+
+.rem-fixed-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.rem-fixed-row-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.rem-fixed-row .rem-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #667085;
+  margin-bottom: 0.25rem;
+}
+
+.rem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rem-card .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rem-card .form-group input,
+.rem-card .form-group select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.rem-hint {
+  color: #667085;
+  font-size: 0.85rem;
+  margin-top: 0;
+}
+
+.rem-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.rem-status-checks {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.rem-checks-inline {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.rem-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.rem-alert-error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.rem-alert-ok {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.rem-report {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 320px;
+  font-size: 0.8rem;
+}
+
+.rem-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.rem-preview-block {
+  margin-top: 1.25rem;
+}
+
+.rem-subheading {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.rem-step2 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+}
+
+.rem-linkish {
+  margin: 0.75rem 0;
+}
+
+.rem-pager {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .rem-fixed-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rem-grid {
+    grid-template-columns: 1fr;
+  }
+}

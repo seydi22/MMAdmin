@@ -1,202 +1,178 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import MerchantsExport from '../components/MerchantsExport';
-import API_BASE_URL from '../config/apiConfig';
-import { formatMerchantStatutLabel, statusBadgeCssSuffix } from '../utils/merchantStatus';
-import './Dashboard.css';
-import './Merchants.css';
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import API_BASE_URL from "../config/apiConfig";
+import { formatMerchantStatutLabel, statusBadgeCssSuffix } from "../utils/merchantStatus";
+import { formatRecruiterLabel } from "../utils/recruiterDisplay";
+import "./Merchants.css";
+import "../pages/Dashboard.css";
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 const Merchants = () => {
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Tous');
-  const [agents, setAgents] = useState([]);
-  const [selectedAgent, setSelectedAgent] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [search, setSearch] = useState("");
+  const [statut, setStatut] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
-  const handleMerchantClick = (merchantId) => {
-    navigate(`/merchants/${merchantId}`);
-  };
-
-  const fetchAgents = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentification requise.');
-      }
-      const response = await axios.get(`${API_BASE_URL}/api/agents/all-agents`, {
-        headers: { 'x-auth-token': token },
-      });
-      setAgents(response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchMerchants = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentification requise.');
-      }
-
-      const url = `${API_BASE_URL}/api/merchants/all`;
-      const params = {
-        statut: statusFilter === 'Tous' ? '' : statusFilter,
-        search: searchTerm,
-        agentId: selectedAgent,
-        sortBy: sortConfig.key,
-        sortOrder: sortConfig.direction === 'ascending' ? 'asc' : 'desc',
-      };
-
-      const response = await axios.get(url, {
-        headers: { 'x-auth-token': token },
-        params: params,
-      });
-      setMerchants(response.data);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'Erreur lors du chargement des marchands.');
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter, searchTerm, selectedAgent, sortConfig]);
+  useEffect(() => {
+    setPage(1);
+  }, [search, statut, limit]);
 
   useEffect(() => {
-    fetchAgents();
-  }, []);
+    const fetchMerchants = async () => {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentification requise.");
+        setLoading(false);
+        return;
+      }
+      try {
+        const params = { page, limit };
+        if (search) params.search = search;
+        if (statut) params.statut = statut;
+        const res = await axios.get(`${API_BASE_URL}/api/merchants/all`, {
+          headers: { "x-auth-token": token },
+          params,
+        });
 
-  useEffect(() => {
-    fetchMerchants();
-  }, [fetchMerchants]);
+        const data = res.data;
+        if (Array.isArray(data)) {
+          setMerchants(data);
+          setTotal(data.length);
+          setTotalPages(1);
+        } else {
+          setMerchants(Array.isArray(data.merchants) ? data.merchants : []);
+          const pagination = data.pagination || {};
+          setTotal(pagination.total ?? data.total ?? 0);
+          setTotalPages(pagination.totalPages ?? data.totalPages ?? 0);
+        }
+      } catch (err) {
+        setError(err.response?.data?.msg || "Erreur lors du chargement des marchands.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    const timer = setTimeout(fetchMerchants, 250);
+    return () => clearTimeout(timer);
+  }, [search, statut, page, limit]);
 
-  const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
+  const statusOptions = useMemo(
+    () => ["", "validé_par_superviseur", "cree", "rejeté", "livré", "rejeté_définitivement"],
+    []
+  );
 
-  const sortedMerchants = useMemo(() => {
-    return [...merchants];
-  }, [merchants]);
-
-  const formatReadableDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content">
         <header className="main-header">
-          <h1>Gestion des marchands</h1>
+          <h1>Marchands</h1>
         </header>
-
+        {error && <div className="merchants-error">{error}</div>}
+        <div className="merchants-filters">
+          <input
+            type="search"
+            placeholder="Rechercher..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <select value={statut} onChange={(e) => setStatut(e.target.value)}>
+            <option value="">Tous les statuts</option>
+            {statusOptions.filter(Boolean).map((s) => (
+              <option key={s} value={s}>{formatMerchantStatutLabel(s)}</option>
+            ))}
+          </select>
+          <select
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            aria-label="Marchands par page"
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>{size} / page</option>
+            ))}
+          </select>
+        </div>
         <div className="card">
-          <div className="card-header">
-            <div className="filters-container">
-              <input
-                type="text"
-                placeholder="Rechercher..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-control"
-              />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="form-control"
-              >
-                <option value="Tous">Tous les statuts</option>
-                <option value="en attente">En attente</option>
-                <option value="validé_par_superviseur">Validé par superviseur</option>
-                <option value="validé">Validé</option>
-                 <option value="cree">Créé</option>
-                <option value="rejeté">Rejeté</option>
-                <option value="rejeté_définitivement">Rejeté définitivement</option>
-                <option value="livré">Livré</option>
-              </select>
-              <select
-                value={selectedAgent}
-                onChange={(e) => setSelectedAgent(e.target.value)}
-                className="form-control"
-              >
-                <option value="">Enrôlé par (tous)</option>
-                {agents.map((agent) => (
-                  <option key={agent._id} value={agent._id}>
-                    {agent.nom} ({agent.matricule})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="card-body">
+          <div className="card-body table-responsive">
             {loading ? (
               <p>Chargement...</p>
-            ) : error ? (
-              <p className="text-danger">{error}</p>
             ) : (
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th onClick={() => requestSort('nom')}>Enseigne</th>
-                      <th onClick={() => requestSort('nomGerant')}>Gérant</th>
-                      <th onClick={() => requestSort('contact')}>Contact</th>
-                      <th onClick={() => requestSort('statut')}>Statut</th>
-                      <th onClick={() => requestSort('agentRecruteurId')}>Enrôlé par</th>
-                      <th onClick={() => requestSort('createdAt')}>Date d’enrôlement</th>
-                      <th onClick={() => requestSort('validatedBySupervisorAt')}>Date de validation par superviseur</th>
-                      <th onClick={() => requestSort('creationDate')}>Date de création</th>
-                      <th onClick={() => requestSort('deliveredAt')}>Date de livraison</th>
+              <table className="merchants-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Contact</th>
+                    <th>AAM</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {merchants.length === 0 ? (
+                    <tr><td colSpan="5">Aucun marchand trouve.</td></tr>
+                  ) : merchants.map((m) => (
+                    <tr key={m._id}>
+                      <td>{m.displayName || m.nom}</td>
+                      <td>{m.contact}</td>
+                      <td>{formatRecruiterLabel(m.agentRecruteurId) || "N/A"}</td>
+                      <td>
+                        <span className={`status-badge status-${statusBadgeCssSuffix(m.statut)}`}>
+                          {formatMerchantStatutLabel(m.statut)}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn-details"
+                          onClick={() => navigate(`/merchants/${m._id}`)}
+                        >
+                          Details
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {sortedMerchants.map((merchant) => (
-                      <tr
-                        key={merchant._id}
-                        onClick={() => handleMerchantClick(merchant._id)}
-                        className="merchant-row"
-                      >
-                        <td>{merchant.displayName || merchant.nom}</td>
-                        <td>{merchant.nomGerant}</td>
-                        <td>{merchant.contact}</td>
-                        <td>
-                          <span className={`status-badge status-${statusBadgeCssSuffix(merchant.statut)}`}>
-                            {formatMerchantStatutLabel(merchant.statut)}
-                          </span>
-                        </td>
-                        <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
-                        <td>{formatReadableDate(merchant.createdAt)}</td>
-                        <td>{formatReadableDate(merchant.validatedBySupervisorAt)}</td>
-                        <td>{formatReadableDate(merchant.creationDate)}</td>
-                        <td>{formatReadableDate(merchant.deliveredAt)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
-        </div>
-        <div className="card mt-4">
-          <div className="card-body">
-            <MerchantsExport />
+          <div className="merchants-pagination">
+            <span className="pagination-info">
+              {total === 0 ? "0 resultat" : `${from}-${to} sur ${total}`}
+            </span>
+            <div className="pagination-controls">
+              <button
+                type="button"
+                className="btn-details"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Precedent
+              </button>
+              <span className="pagination-page">
+                Page {totalPages === 0 ? 0 : page} / {totalPages}
+              </span>
+              <button
+                type="button"
+                className="btn-details"
+                disabled={page >= totalPages || loading}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Suivant
+              </button>
+            </div>
           </div>
         </div>
       </main>

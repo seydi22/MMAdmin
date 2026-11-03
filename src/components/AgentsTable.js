@@ -12,6 +12,7 @@ const AgentsTable = ({ agents }) => {
             <th>Matricule</th>
             <th>Rôle</th>
             <th>Affiliation</th>
+            <th>Moov Money</th>
             <th>Enrôlements</th>
             <th>Validations</th>
           </tr>
@@ -22,8 +23,9 @@ const AgentsTable = ({ agents }) => {
               <td>{agent.matricule}</td>
               <td>{agent.role}</td>
               <td>{agent.affiliation}</td>
-              <td>{agent.performance.enrôlements}</td>
-              <td>{agent.performance.validations}</td>
+              <td>{agent.moovMoneyMsisdn || '—'}</td>
+              <td>{agent.performance?.enrôlements ?? 0}</td>
+              <td>{agent.performance?.validations ?? 0}</td>
             </tr>
           ))}
         </tbody>

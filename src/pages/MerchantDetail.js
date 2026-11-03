@@ -11,8 +11,9 @@ import {
   canAdminRejectDefinitive,
 } from '../utils/merchantStatus';
 import { formatRecruiterLabel, getAgentIdFromRecruiterRef } from '../utils/recruiterDisplay';
+import { canSee } from '../utils/portalAccess';
 import './MerchantDetail.css';
-import { FaUser, FaBuilding, FaFileAlt, FaArrowLeft, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaUser, FaBuilding, FaFileAlt, FaArrowLeft, FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
 import { BiSupport } from 'react-icons/bi';
 
 const MerchantDetail = () => {
@@ -26,6 +27,34 @@ const MerchantDetail = () => {
   const [definitiveReason, setDefinitiveReason] = useState('');
   const [definitiveSubmitting, setDefinitiveSubmitting] = useState(false);
   const [enrolledByLabel, setEnrolledByLabel] = useState('loading');
+
+  const openImagePreview = (event, url) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!url) return;
+    setModalImage(url);
+  };
+
+  // Differer la fermeture pour eviter removeChild pendant le traitement du clic.
+  const closeImagePreview = () => {
+    window.setTimeout(() => setModalImage(null), 0);
+  };
+
+  useEffect(() => {
+    if (!modalImage) return undefined;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') closeImagePreview();
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [modalImage]);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -147,6 +176,15 @@ const MerchantDetail = () => {
     }
   };
 
+  const matrixSlotLabel = (slot) => {
+    if (!slot) return '—';
+    const name = [slot.prenom, slot.nom].filter(Boolean).join(' ') || slot.role || 'Compte';
+    const parts = [name];
+    if (slot.nni) parts.push(`NNI ${slot.nni}`);
+    parts.push(slot.msisdn || 'MSISDN manquant');
+    return parts.join(' — ');
+  };
+
   const DetailItem = ({ label, value }) => (
     <div className="detail-item">
       <span className="detail-label">{label}</span>
@@ -172,11 +210,21 @@ const MerchantDetail = () => {
               <span className={`status-badge ${getStatusBadge(merchant.statut)}`}>
                 {formatMerchantStatutLabel(merchant.statut)}
               </span>
+              {merchant.statut === 'en attente' && (
+                <span>
+                  {merchant.validationEtape === 'cam'
+                    ? 'Étape CAM'
+                    : merchant.validationEtape === 'pam'
+                      ? 'Étape PAM'
+                      : 'Étape SAM'}
+                </span>
+              )}
+              {merchant.statut === 'rejeté' && <span>À corriger par l&apos;AAM</span>}
               <span>Date d'enrôlement: {new Date(merchant.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
           <div className="details-header-actions">
-            {canAdminRejectDefinitive(merchant.statut) && (
+            {canSee('validation') && canAdminRejectDefinitive(merchant.statut) && (
               <button
                 type="button"
                 className="btn-definitive-reject"
@@ -185,7 +233,7 @@ const MerchantDetail = () => {
                 Rejet définitif (admin)
               </button>
             )}
-            <button className="btn-back" onClick={() => navigate('/merchants')}>
+            <button className="btn-back" onClick={() => navigate(canSee('marchands') ? '/merchants' : '/merchants/pending-validation')}>
               <FaArrowLeft /> Retour à la liste
             </button>
           </div>
@@ -212,11 +260,29 @@ const MerchantDetail = () => {
               {merchant.rejectionReason && (
                 <DetailItem label="Motif de rejet" value={merchant.rejectionReason} />
               )}
-              <DetailItem label="Date de validation par superviseur" value={merchant.validatedBySupervisorAt ? new Date(merchant.validatedBySupervisorAt).toLocaleDateString() : 'N/A'} />
+              <DetailItem label="Fin de validation terrain" value={merchant.validatedBySupervisorAt ? new Date(merchant.validatedBySupervisorAt).toLocaleDateString() : 'N/A'} />
               <DetailItem label="Date de validation finale" value={merchant.validatedAt ? new Date(merchant.validatedAt).toLocaleDateString() : 'N/A'} />
               <DetailItem label="Date de livraison" value={merchant.deliveredAt ? new Date(merchant.deliveredAt).toLocaleDateString() : 'en attente de livraison'} />
             </div>
           </div>
+
+          {merchant.commissionMatrix?.capturedAt && (
+            <div className="card-details full-width">
+              <div className="card-header-details">
+                <FaFileAlt className="card-icon" />
+                <h3>Matrice MSISDN</h3>
+              </div>
+              <div className="card-body-details grid-col-2">
+                <DetailItem label="Figée le" value={new Date(merchant.commissionMatrix.capturedAt).toLocaleString()} />
+                <DetailItem label="Envoi CPS" value="Stockée, pas encore transmise" />
+                <DetailItem label="Membre 1" value={matrixSlotLabel(merchant.commissionMatrix.aam1)} />
+                <DetailItem label="Membre 2" value={matrixSlotLabel(merchant.commissionMatrix.aam2)} />
+                <DetailItem label="SAM" value={matrixSlotLabel(merchant.commissionMatrix.sam)} />
+                <DetailItem label="CAM" value={matrixSlotLabel(merchant.commissionMatrix.cam)} />
+                <DetailItem label="PAM" value={matrixSlotLabel(merchant.commissionMatrix.pam)} />
+              </div>
+            </div>
+          )}
 
           {/* Manager Info Card */}
           <div className="card-details">
@@ -238,7 +304,9 @@ const MerchantDetail = () => {
             </div>
             <div className="card-body-details grid-col-2">
               <DetailItem label="Secteur" value={merchant.secteur} />
-              <DetailItem label="Type de commerce" value={merchant.typeCommerce} />
+              <DetailItem label="Catégorie" value={merchant.categorie} />
+              <DetailItem label="Nature" value={merchant.typeCommerce} />
+              <DetailItem label="Taille" value={merchant.taille} />
               <DetailItem label="NIF" value={merchant.nif} />
               <DetailItem label="RC" value={merchant.rc} />
               <DetailItem label="Adresse" value={merchant.adresse} />
@@ -254,8 +322,9 @@ const MerchantDetail = () => {
             </div>
             <div className="card-body-details grid-col-2">
                 <DetailItem label="Région" value={merchant.region} />
-                <DetailItem label="Ville" value={merchant.ville} />
+                <DetailItem label="Moughataa" value={merchant.ville} />
                 <DetailItem label="Commune" value={merchant.commune} />
+                <DetailItem label="Localité" value={merchant.localite} />
                 <DetailItem label="Coordonnées GPS" value={`${merchant.latitude}, ${merchant.longitude}`} />
             </div>
           </div>
@@ -273,13 +342,19 @@ const MerchantDetail = () => {
               </div>
               <div className="image-gallery-details">
                 {merchant.qrCodePhotoUrl && (
-                  <div className="image-item-details" onClick={() => setModalImage(merchant.qrCodePhotoUrl)}>
+                  <div
+                    className="image-item-details"
+                    onClick={(e) => openImagePreview(e, merchant.qrCodePhotoUrl)}
+                  >
                     <h6>Photo du QR code posé</h6>
                     <img src={merchant.qrCodePhotoUrl} alt="QR Code" />
                   </div>
                 )}
                 {merchant.paymentTestPhotoUrl && (
-                  <div className="image-item-details" onClick={() => setModalImage(merchant.paymentTestPhotoUrl)}>
+                  <div
+                    className="image-item-details"
+                    onClick={(e) => openImagePreview(e, merchant.paymentTestPhotoUrl)}
+                  >
                     <h6>Capture du test de paiement</h6>
                     <img src={merchant.paymentTestPhotoUrl} alt="Payment Test" />
                   </div>
@@ -319,24 +394,36 @@ const MerchantDetail = () => {
             </div>
             <div className="card-body-details">
               <div className="image-gallery-details">
-                <div className="image-item-details" onClick={() => setModalImage(merchant.photoEnseigneUrl)}>
+                <div
+                  className="image-item-details"
+                  onClick={(e) => openImagePreview(e, merchant.photoEnseigneUrl)}
+                >
                   <h6>Photo de l'enseigne</h6>
                   <img src={merchant.photoEnseigneUrl} alt="Enseigne" />
                 </div>
                 {merchant.pieceIdentite?.type === 'cni' && (
                   <>
-                    <div className="image-item-details" onClick={() => setModalImage(merchant.pieceIdentite.cniRectoUrl)}>
+                    <div
+                      className="image-item-details"
+                      onClick={(e) => openImagePreview(e, merchant.pieceIdentite.cniRectoUrl)}
+                    >
                       <h6>CNI Recto</h6>
                       <img src={merchant.pieceIdentite.cniRectoUrl} alt="CNI Recto" />
                     </div>
-                    <div className="image-item-details" onClick={() => setModalImage(merchant.pieceIdentite.cniVersoUrl)}>
+                    <div
+                      className="image-item-details"
+                      onClick={(e) => openImagePreview(e, merchant.pieceIdentite.cniVersoUrl)}
+                    >
                       <h6>CNI Verso</h6>
                       <img src={merchant.pieceIdentite.cniVersoUrl} alt="CNI Verso" />
                     </div>
                   </>
                 )}
                 {merchant.pieceIdentite?.type === 'passeport' && (
-                  <div className="image-item-details" onClick={() => setModalImage(merchant.pieceIdentite.passeportUrl)}>
+                  <div
+                    className="image-item-details"
+                    onClick={(e) => openImagePreview(e, merchant.pieceIdentite.passeportUrl)}
+                  >
                     <h6>Passeport</h6>
                     <img src={merchant.pieceIdentite.passeportUrl} alt="Passeport" />
                   </div>
@@ -347,13 +434,30 @@ const MerchantDetail = () => {
         </div>
 
         {modalImage && (
-          <div className="modal-overlay" onClick={() => setModalImage(null)}>
+          <div
+            className="modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Apercu photo"
+            onMouseDown={(e) => {
+              // mousedown + target check: evite le conflit removeChild du clic
+              if (e.target === e.currentTarget) closeImagePreview();
+            }}
+          >
             <div
               className="modal-content-details"
-              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
               role="presentation"
             >
-              <img src={modalImage} alt="Aperçu agrandi" />
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={closeImagePreview}
+                aria-label="Fermer"
+              >
+                <FaTimes />
+              </button>
+              <img src={modalImage} alt="Apercu agrandi" />
             </div>
           </div>
         )}

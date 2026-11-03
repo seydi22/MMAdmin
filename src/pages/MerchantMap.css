@@ -58,6 +58,7 @@
 }
 
 .control-group input[type="text"],
+.control-group input[type="date"],
 .control-group select {
   width: 100%;
   padding: 8px;
@@ -110,12 +111,36 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.4);
 }
 
-.marker-icon-valide div { background-color: #28a745; } /* Vert */
-.marker-icon-en-attente div { background-color: #ffc107; } /* Jaune */
-.marker-icon-rejete div { background-color: #dc3545; } /* Rouge */
-.marker-icon-rejete-definitif div { background-color: #7f1d1d; } /* Rouge foncé */
-.marker-icon-livre div { background-color: #3498db; } /* Bleu */
+.marker-icon-valide div,
+.legend-color-box.marker-icon-valide { background-color: #28a745; }
+.marker-icon-en-attente div,
+.legend-color-box.marker-icon-en-attente { background-color: #ffc107; }
+.marker-icon-superviseur div,
+.legend-color-box.marker-icon-superviseur { background-color: #F36E21; }
+.marker-icon-rejete div,
+.legend-color-box.marker-icon-rejete { background-color: #dc3545; }
+.marker-icon-rejete-definitif div,
+.legend-color-box.marker-icon-rejete-definitif { background-color: #7f1d1d; }
+.marker-icon-livre div,
+.legend-color-box.marker-icon-livre { background-color: #3498db; }
 .marker-icon-default div { background-color: #6c757d; } /* Gris */
+
+.marker-icon-equipe div,
+.legend-color-box.marker-icon-equipe {
+  background-color: #005BAC;
+  border-radius: 2px;
+}
+
+.legend-color-box.marker-icon-parcours {
+  background-color: #F16522;
+  border-radius: 50%;
+}
+
+.map-empty-hint {
+  margin: 0;
+  color: #555;
+  font-weight: normal;
+}
 
 
 /* --- Légende de la carte --- */

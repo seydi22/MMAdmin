@@ -1,310 +1,107 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import API_BASE_URL from "../config/apiConfig";
+import { formatMerchantStatutLabel } from "../utils/merchantStatus";
+import { formatRecruiterLabel } from "../utils/recruiterDisplay";
+import "./Merchants.css";
+import "../pages/Dashboard.css";
 
-// src/pages/AdminValidation.js
-
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Modal from '../components/Modal/Modal'; // Assuming you have a Modal component
-import API_BASE_URL from '../config/apiConfig';
-import {
-  formatMerchantStatutLabel,
-  statusBadgeCssSuffix,
-  isMerchantLockedDefinitive,
-  canAdminRejectDefinitive,
-} from '../utils/merchantStatus';
-import './Merchants.css';
+function enRetard(merchant) {
+  const at = merchant.validatedBySupervisorAt || merchant.createdAt;
+  if (!at) return false;
+  return Date.now() - new Date(at).getTime() >= 24 * 60 * 60 * 1000;
+}
 
 const AdminValidation = () => {
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [validatingId, setValidatingId] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [showDefinitiveModal, setShowDefinitiveModal] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [definitiveReason, setDefinitiveReason] = useState('');
-  const [selectedMerchantId, setSelectedMerchantId] = useState(null);
-  const [definitiveSubmitting, setDefinitiveSubmitting] = useState(false);
+  const [actionId, setActionId] = useState(null);
+  const [rejectId, setRejectId] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
   const navigate = useNavigate();
+  const token = () => localStorage.getItem("token");
 
-  const fetchPendingMerchants = async () => {
+  const fetchPending = async () => {
     setLoading(true);
     setError(null);
+    if (!token()) { setError("Authentification requise."); setLoading(false); return; }
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentification requise.');
-      }
-
-      const url = `${API_BASE_URL}/api/merchants/pending-admin-validation`;
-      const response = await axios.get(url, {
-        headers: {
-          'x-auth-token': token,
-        },
+      const res = await axios.get(`${API_BASE_URL}/api/merchants/pending-admin-validation`, {
+        headers: { "x-auth-token": token() },
       });
-      setMerchants(response.data);
+      setMerchants(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error(err);
-      setError(err.message || 'Erreur lors du chargement des marchands en attente de validation.');
-    } finally {
-      setLoading(false);
-    }
+      setError(err.response?.data?.msg || "Erreur lors du chargement des dossiers.");
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchPendingMerchants();
-  }, []);
+  useEffect(() => { fetchPending(); }, []);
 
-  const handleValidate = async (merchantId) => {
+  const handleValidate = async (id) => {
+    setActionId(id); setError(null);
     try {
-      setValidatingId(merchantId);
-      setErrorMessage('');
-      const token = localStorage.getItem('token');
-      const resp = await axios.post(`${API_BASE_URL}/api/merchants/admin-validate/${merchantId}`, {}, {
-        headers: { 'x-auth-token': token },
-      });
-      const merchantName = resp?.data?.merchant?.nom ? ` (${resp.data.merchant.nom})` : '';
-      setSuccessMessage(`Marchand${merchantName} créé sur le SP Portal avec succès.`);
-      fetchPendingMerchants(); // Refresh the list
-    } catch (err) {
-      console.error('Erreur lors de la validation du marchand', err);
-      const apiMsg = err.response?.data?.msg;
-      const apiMerchant = err.response?.data?.merchant;
-      const shortCode = apiMerchant?.shortCode;
-      const topOrgOk = String(apiMerchant?.cpsIntegration?.createTopOrg?.resultCode) === '0';
-      const orgOpFailed = String(apiMerchant?.cpsIntegration?.status) === 'failed';
-
-      if (topOrgOk && orgOpFailed) {
-        const sc = shortCode ? ` (ShortCode: ${shortCode})` : '';
-        setErrorMessage(
-          `Top organisation créée avec succès${sc}, mais la création de l’opérateur a échoué. ` +
-          `Tu peux corriger les données opérateur puis cliquer à nouveau sur “Valider” pour retenter uniquement l’opérateur.`
-        );
-      } else {
-        const msg = apiMsg || err.message || 'Erreur lors de la validation.';
-        setErrorMessage(msg);
-      }
-    } finally {
-      setValidatingId(null);
-    }
+      await axios.post(`${API_BASE_URL}/api/merchants/admin-validate/${id}`, {}, { headers: { "x-auth-token": token() } });
+      await fetchPending();
+    } catch (err) { setError(err.response?.data?.msg || "Echec de la validation."); }
+    finally { setActionId(null); }
   };
 
-  useEffect(() => {
-    if (!successMessage) return;
-    const t = setTimeout(() => setSuccessMessage(''), 5000);
-    return () => clearTimeout(t);
-  }, [successMessage]);
-
-  const openRejectModal = (merchantId) => {
-    setSelectedMerchantId(merchantId);
-    setShowDefinitiveModal(false);
-    setShowModal(true);
-  };
-
-  const openDefinitiveModal = (merchantId) => {
-    setSelectedMerchantId(merchantId);
-    setShowModal(false);
-    setDefinitiveReason('');
-    setShowDefinitiveModal(true);
-  };
-
-  const handleReject = async () => {
-    if (!rejectionReason.trim()) {
-      alert('La raison du rejet est obligatoire.');
-      return;
-    }
+  const handleReject = async (id) => {
+    if (!rejectReason.trim()) { setError("Indiquez une raison de rejet."); return; }
+    setActionId(id); setError(null);
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_BASE_URL}/api/merchants/admin-reject/${selectedMerchantId}`, 
-        { rejectionReason }, 
-        {
-          headers: { 'x-auth-token': token },
-        }
-      );
-      setShowModal(false);
-      setRejectionReason('');
-      fetchPendingMerchants(); // Refresh the list
-    } catch (err) {
-      const msg = err.response?.data?.msg || err.message;
-      alert(msg || 'Erreur lors du rejet du marchand.');
-      console.error('Erreur lors du rejet du marchand', err);
-    }
+      await axios.post(`${API_BASE_URL}/api/merchants/admin-reject/${id}`, { rejectionReason: rejectReason.trim() }, { headers: { "x-auth-token": token() } });
+      setRejectId(null); setRejectReason(""); await fetchPending();
+    } catch (err) { setError(err.response?.data?.msg || "Echec du rejet."); }
+    finally { setActionId(null); }
   };
 
-  const handleDefinitiveReject = async () => {
-    const reason = definitiveReason.trim();
-    if (!reason) {
-      alert('La raison du rejet définitif est obligatoire.');
-      return;
-    }
-    setDefinitiveSubmitting(true);
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${API_BASE_URL}/api/merchants/admin-reject-definitive/${selectedMerchantId}`,
-        { rejectionReason: reason },
-        { headers: { 'x-auth-token': token } }
-      );
-      setShowDefinitiveModal(false);
-      setDefinitiveReason('');
-      fetchPendingMerchants();
-    } catch (err) {
-      const msg = err.response?.data?.msg || err.message;
-      alert(msg || 'Erreur lors du rejet définitif.');
-      console.error('Erreur lors du rejet définitif', err);
-    } finally {
-      setDefinitiveSubmitting(false);
-    }
-  };
-
-  const handleMerchantClick = (merchantId) => {
-    navigate(`/merchants/${merchantId}`);
-  };
+  if (loading) return <div className="loading-container">Chargement...</div>;
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content">
-        <header className="main-header">
-          <h1>Validation Finale des Marchands</h1>
-        </header>
-
-        {successMessage && (
-          <div className="alert-success" role="status">
-            {successMessage}
+        <header className="main-header"><h1>Validation finale des marchands</h1></header>
+        <p style={{ maxWidth: 760, color: '#555' }}>Ces dossiers sont au statut validé par superviseur. La validation finale, faite ici, crée le marchand.</p>
+        {merchants.some((m) => enRetard(m)) && (
+          <div className="delay-banner">
+            {merchants.filter((m) => enRetard(m)).length} dossier(s) attendent la création depuis plus de 24 h.
           </div>
         )}
-        {errorMessage && (
-          <div className="alert-error" role="alert">
-            {errorMessage}
-          </div>
-        )}
-
-        <div className="card">
-          <div className="card-body">
-            {loading ? (
-              <p>Chargement...</p>
-            ) : error ? (
-              <p className="text-danger">{error}</p>
-            ) : (
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Enseigne</th>
-                      <th>Gérant</th>
-                      <th>Contact</th>
-                      <th>Statut</th>
-                      <th>Enrôlé par</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {merchants.map((merchant) => (
-                      <tr key={merchant._id}>
-                        <td onClick={() => handleMerchantClick(merchant._id)} className="merchant-name-clickable">{merchant.nom}</td>
-                        <td>{merchant.nomGerant}</td>
-                        <td>{merchant.contact}</td>
-                        <td>
-                          <span className={`status-badge status-${statusBadgeCssSuffix(merchant.statut)}`}>
-                            {formatMerchantStatutLabel(merchant.statut)}
-                          </span>
-                        </td>
-                        <td>{merchant.agentRecruteurId?.matricule || 'N/A'}</td>
-                        <td onClick={(e) => e.stopPropagation()}>
-                          {isMerchantLockedDefinitive(merchant.statut) ? (
-                            <span className="text-muted" title="Dossier verrouillé">
-                              —
-                            </span>
-                          ) : (
-                            <div className="admin-validation-actions">
-                              <button
-                                type="button"
-                                onClick={() => handleValidate(merchant._id)}
-                                className="btn btn-success btn-sm"
-                                disabled={validatingId === merchant._id}
-                                title={validatingId === merchant._id ? 'Validation en cours…' : 'Valider'}
-                              >
-                                {validatingId === merchant._id ? 'Validation…' : 'Valider'}
-                              </button>
-                              <button type="button" onClick={() => openRejectModal(merchant._id)} className="btn btn-danger btn-sm">Rejeter</button>
-                              {canAdminRejectDefinitive(merchant.statut) && (
-                                <button
-                                  type="button"
-                                  onClick={() => openDefinitiveModal(merchant._id)}
-                                  className="btn btn-definitive-sm"
-                                >
-                                  Rejet définitif
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
+        {error && <div className="merchants-error">{error}</div>}
+        <div className="card"><div className="card-body table-responsive">
+          <table className="merchants-table">
+            <thead><tr><th>Nom</th><th>Contact</th><th>AAM</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody>
+              {merchants.length === 0 ? (
+                <tr><td colSpan="5">Aucun dossier en attente de validation admin.</td></tr>
+              ) : merchants.map((m) => (
+                <tr key={m._id} className={enRetard(m) ? 'row-late' : ''}>
+                  <td>{m.nom}</td><td>{m.contact}</td><td>{formatRecruiterLabel(m.agentRecruteurId) || "N/A"}</td>
+                  <td>{formatMerchantStatutLabel(m.statut)}</td>
+                  <td className="actions-cell">
+                    <button type="button" className="btn-details" onClick={() => navigate(`/merchants/${m._id}`)}>Details</button>
+                    <button type="button" className="btn-validate" disabled={actionId === m._id} onClick={() => handleValidate(m._id)}>{actionId === m._id ? "..." : "Valider / Creer"}</button>
+                    {rejectId === m._id ? (
+                      <div className="reject-inline">
+                        <input type="text" placeholder="Raison du rejet" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+                        <button type="button" className="btn-reject" disabled={actionId === m._id} onClick={() => handleReject(m._id)}>Confirmer</button>
+                        <button type="button" className="btn-details" onClick={() => setRejectId(null)}>Annuler</button>
+                      </div>
+                    ) : (
+                      <button type="button" className="btn-reject" onClick={() => { setRejectId(m._id); setRejectReason(""); }}>Rejeter</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div></div>
       </main>
-
-      {showModal && (
-        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-          <h2>Rejet (renvoi / correction)</h2>
-          <p className="modal-helper-text">Le dossier peut être repris selon le workflow habituel.</p>
-          <textarea
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder="Expliquez pourquoi le marchand est rejeté..."
-            rows="4"
-            style={{ width: '100%', marginBottom: '1rem' }}
-          />
-          <button type="button" onClick={handleReject} className="btn btn-primary">Envoyer</button>
-        </Modal>
-      )}
-
-      {showDefinitiveModal && (
-        <Modal
-          isOpen={showDefinitiveModal}
-          onClose={() => !definitiveSubmitting && setShowDefinitiveModal(false)}
-        >
-          <h2>Rejet définitif</h2>
-          <p className="modal-helper-text">
-            Action irréversible : le dossier ne pourra plus être modifié ni validé.
-          </p>
-          <textarea
-            value={definitiveReason}
-            onChange={(e) => setDefinitiveReason(e.target.value)}
-            placeholder="Raison du rejet définitif (obligatoire)…"
-            rows="4"
-            style={{ width: '100%', marginBottom: '1rem' }}
-            disabled={definitiveSubmitting}
-          />
-          <div className="modal-actions-row">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={definitiveSubmitting}
-              onClick={() => setShowDefinitiveModal(false)}
-            >
-              Annuler
-            </button>
-            <button
-              type="button"
-              className="btn btn-definitive-sm"
-              disabled={definitiveSubmitting || !definitiveReason.trim()}
-              onClick={handleDefinitiveReject}
-            >
-              {definitiveSubmitting ? 'Envoi…' : 'Confirmer le rejet définitif'}
-            </button>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 };

@@ -16,6 +16,7 @@ const SupervisorAgentManagement = () => {
   const [matricule, setMatricule] = useState('');
   const [password, setPassword] = useState('');
   const [affiliation, setAffiliation] = useState('');
+  const [moovMoneyMsisdn, setMoovMoneyMsisdn] = useState('');
   const [role, setRole] = useState('agent');
 
   const API_URL = `${API_BASE_URL}/api/agents`;
@@ -65,7 +66,13 @@ const SupervisorAgentManagement = () => {
           'Content-Type': 'application/json',
           'x-auth-token': token,
         },
-        body: JSON.stringify({ matricule, motDePasse: password, affiliation, role: 'agent' }),
+        body: JSON.stringify({
+          matricule,
+          motDePasse: password,
+          affiliation,
+          role: 'agent',
+          ...(moovMoneyMsisdn.trim() ? { moovMoneyMsisdn: moovMoneyMsisdn.trim() } : {}),
+        }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -88,6 +95,7 @@ const SupervisorAgentManagement = () => {
     const body = {};
     if (password) body.motDePasse = password;
     if (role !== currentAgent.role) body.role = role;
+    if (moovMoneyMsisdn.trim()) body.moovMoneyMsisdn = moovMoneyMsisdn.trim();
 
     try {
       const response = await fetch(`${API_URL}/${currentAgent._id}`, {
@@ -142,6 +150,7 @@ const SupervisorAgentManagement = () => {
     setMatricule('');
     setPassword('');
     setAffiliation('');
+    setMoovMoneyMsisdn('');
     setRole('agent');
     setIsModalOpen(true);
   };
@@ -151,6 +160,7 @@ const SupervisorAgentManagement = () => {
     setCurrentAgent(agent);
     setMatricule(agent.matricule);
     setPassword(''); // Laisser vide pour ne pas envoyer le mot de passe
+    setMoovMoneyMsisdn(agent.moovMoneyMsisdn || '');
     setRole(agent.role);
     setIsModalOpen(true);
   };
@@ -190,6 +200,7 @@ const SupervisorAgentManagement = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matricule</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliation</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Moov Money</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrôlements</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validations</th>
@@ -201,6 +212,7 @@ const SupervisorAgentManagement = () => {
                   <tr key={agent._id}>
                     <td className="px-6 py-4 whitespace-nowrap">{agent.matricule}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{agent.affiliation ?? 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{agent.moovMoneyMsisdn || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{agent.role}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{agent.performance?.enrôlements ?? 0}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{agent.performance?.validations ?? 0}</td>
@@ -247,6 +259,18 @@ const SupervisorAgentManagement = () => {
                 />
               </div>
             )}
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">Numéro Moov Money</label>
+              <input
+                type="tel"
+                inputMode="numeric"
+                value={moovMoneyMsisdn}
+                onChange={(e) => setMoovMoneyMsisdn(e.target.value.replace(/\D/g, ''))}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                placeholder="Ex. 22XXXXXX"
+                maxLength={11}
+              />
+            </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">Nouveau mot de passe</label>
               <input

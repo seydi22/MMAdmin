@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import api from '../services/api';
 import './Login.css';
-import logo from '../image/logo.png'; // Import the logo
+import logo from '../image/logo.png';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,93 +12,96 @@ const Login = () => {
   });
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
     try {
       const res = await api.post('/api/agents/login', formData);
+      const role = res.data.agent.role;
+      if (role !== 'admin' && role !== 'backoffice' && role !== 'logisticien') {
+        setError('Ce portail est réservé à l’administrateur central, aux comptes back-office et au gestionnaire de stock. PAM, CAM, SAM et AAM se connectent sur l’application mobile.');
+        return;
+      }
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('userRole', res.data.agent.role);
-
-      if (res.data.agent.role === 'superviseur') {
-        navigate('/supervisor');
-      } else {
-        navigate('/');
-      }
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('habilitations', JSON.stringify(res.data.agent.habilitations || []));
+      navigate(role === 'logisticien' ? '/stock' : '/');
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.msg) {
-        console.error(err.response.data.msg);
-        setError(err.response.data.msg);
-      } else {
-        console.error('An unexpected error occurred:', err);
-        setError('An unexpected error occurred. Please try again.');
-      }
+      const message = err.response && err.response.data && err.response.data.msg;
+      setError(message || 'Connexion impossible. Réessayez.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
+    <div className="login-screen">
     <div className="login-page">
-      <div className="login-branding">
-        <img src={logo} alt="Company Logo" className="login-logo" />
-        <h1 className="branding-title">Bienvenue</h1>
-        <p className="branding-subtitle">Connectez-vous pour accéder à votre tableau de bord</p>
-      </div>
-      <div className="login-form-container">
-        <div className="login-form">
-          <h3 className="form-title">Connexion</h3>
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Matricule</label>
+      <section className="login-branding">
+        <img src={logo} alt="Moov Money" className="login-logo" />
+        <h1>Back-office PNAM</h1>
+        <p>Le portail d’administration du programme.</p>
+        <ul>
+          <li>Organisation des PAM, SAM, CAM et EAM</li>
+          <li>Validation finale des marchands</li>
+          <li>Suivi et journal d’activité</li>
+          <li>Parc matériel pour le gestionnaire de stock</li>
+        </ul>
+      </section>
+      <section className="login-form-container">
+        <form className="login-form" onSubmit={handleSubmit}>
+          <h2>Connexion</h2>
+          <p className="login-intro">Administrateur central, comptes back-office et gestionnaire de stock.</p>
+          {error && <div className="login-alert" role="alert">{error}</div>}
+          <div className="login-field">
+            <label htmlFor="matricule">Matricule</label>
+            <input
+              id="matricule"
+              type="text"
+              name="matricule"
+              autoComplete="username"
+              value={formData.matricule}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="login-field">
+            <label htmlFor="motDePasse">Mot de passe</label>
+            <div className="login-password">
               <input
-                type="text"
-                name="matricule"
-                className="form-control"
-                value={formData.matricule}
+                id="motDePasse"
+                type={showPassword ? 'text' : 'password'}
+                name="motDePasse"
+                autoComplete="current-password"
+                value={formData.motDePasse}
                 onChange={handleChange}
                 required
               />
+              <button
+                type="button"
+                className="login-reveal"
+                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
-            <div className="form-group password-container">
-              <label className="form-label">Mot de passe</label>
-              <div className="password-input-wrapper">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="motDePasse"
-                  className="form-control"
-                  value={formData.motDePasse}
-                  onChange={handleChange}
-                  required
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary password-toggle-btn"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
-            <button type="submit" className="btn btn-primary w-100 login-btn">
-              Se connecter
-            </button>
-          </form>
-          <p className="login-footer">© Moov Money 2025</p>
-        </div>
-      </div>
+          </div>
+          <button type="submit" className="login-submit" disabled={loading}>
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+          <p className="login-footer">© Moov Money {new Date().getFullYear()}</p>
+        </form>
+      </section>
+    </div>
     </div>
   );
 };

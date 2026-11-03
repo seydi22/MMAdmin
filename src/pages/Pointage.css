@@ -1,0 +1,48 @@
+.pointage-page .pointage-intro {
+  max-width: 860px;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.pointage-page .pointage-date {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  max-width: 220px;
+  margin-bottom: 1rem;
+}
+
+.pointage-page .pointage-alert {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #9b1c1c;
+}
+
+.pointage-page .pointage-section {
+  margin-bottom: 1.5rem;
+}
+
+.pointage-page .pointage-section h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.pointage-page .pointage-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.pointage-page .pointage-table th,
+.pointage-page .pointage-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--color-border, #e6e6e6);
+  text-align: left;
+}
+
+.pointage-page .pointage-table th {
+  font-size: 0.85rem;
+  color: #5c6770;
+}

@@ -7,15 +7,17 @@
 
 .main-content {
   flex-grow: 1;
-  padding: var(--spacing-xl);
-  margin-left: 260px; /* Same as sidebar width */
+  min-width: 0;
+  padding: 1.5rem 1.75rem 2.5rem;
+  margin-left: var(--sidebar-width);
 }
 
 .main-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-xl);
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .user-info {
@@ -26,6 +28,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .loading-container,
@@ -37,18 +40,102 @@
   font-size: 1.2rem;
 }
 
-@media (max-width: 768px) {
+.delay-alerts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.delay-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.delay-intro,
+.delay-empty {
+  margin: 0 0 0.75rem;
+  color: var(--color-text-light);
+}
+
+.delay-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.delay-list button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1.4fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+}
+
+.delay-list li.is-late button {
+  border-color: #f0b4a2;
+  background: #fff6f3;
+}
+
+.delay-list span {
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.delay-list em {
+  font-style: normal;
+  color: #9b3b12;
+  font-weight: 600;
+}
+
+.delay-who {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: var(--color-text-dark);
+  font-weight: 600;
+}
+
+.delay-banner {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #fff6f3;
+  border: 1px solid #f0b4a2;
+  color: #9b3b12;
+  font-weight: 600;
+}
+
+.row-late td {
+  background: #fff6f3;
+}
+
+@media (max-width: 900px) {
   .main-content {
     margin-left: 0;
-  }
-
-  .sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
+    padding: 4.4rem 1rem 1.75rem;
   }
 
   .dashboard-layout {
+    display: block;
+  }
+
+  .main-header {
     flex-direction: column;
+  }
+
+  .delay-list button {
+    grid-template-columns: 1fr;
   }
 }

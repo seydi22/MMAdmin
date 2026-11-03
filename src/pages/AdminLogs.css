@@ -1,1 +1,241 @@
-/* Add any specific styles for the AdminLogs page here */
+.logs-page .main-header {
+  margin-bottom: 0.75rem;
+  align-items: flex-start;
+}
+
+.logs-page .main-header h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.logs-lead {
+  max-width: 720px;
+  margin: 0;
+  color: var(--color-text-light);
+  line-height: 1.5;
+}
+
+.logs-panel {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.logs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.logs-search {
+  max-width: 420px;
+}
+
+.logs-count {
+  margin-left: auto;
+  color: var(--color-text-light);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.logs-alert {
+  margin: 0.75rem 1rem 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: #fdecea;
+  color: #9b1c1c;
+  border: 1px solid #f5c2c0;
+}
+
+.logs-table-wrap {
+  overflow-x: auto;
+}
+
+.logs-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.logs-table th {
+  padding: 0.7rem 0.9rem;
+  text-align: left;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5c6770;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.logs-table td {
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid #eef1f4;
+  vertical-align: top;
+}
+
+.logs-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+.logs-when {
+  white-space: nowrap;
+}
+
+.logs-when span {
+  display: block;
+}
+
+.logs-when span:last-child,
+.logs-meta {
+  color: var(--color-text-light);
+  font-size: 0.82rem;
+}
+
+.logs-matricule,
+.logs-action,
+.logs-cible {
+  font-weight: 600;
+}
+
+.logs-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.logs-role {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  background: #e8f1fb;
+  color: #005BAC;
+}
+
+.logs-role-admin { background: #fff4ec; color: #c2410c; }
+.logs-role-aam { background: #e8f6ee; color: #146c43; }
+.logs-role-sam { background: #e8f1fb; color: #005BAC; }
+.logs-role-cam { background: #f3e8ff; color: #6b21a8; }
+.logs-role-pam { background: #fff7ed; color: #9a3412; }
+
+.logs-detail {
+  max-width: 320px;
+  color: #495057;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.logs-ip {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-text-dark);
+  font-weight: 700;
+}
+
+.logs-ip span {
+  display: block;
+}
+
+.logs-ip span:last-child {
+  margin-top: 0.15rem;
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.logs-table th:last-child,
+.logs-table td.logs-ip {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -8px 0 8px rgba(255, 255, 255, 0.9);
+}
+
+.logs-table th:last-child {
+  background: #f8f9fa;
+}
+
+.logs-outcome {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.08rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.logs-outcome.is-ok {
+  background: #e8f6ee;
+  color: #146c43;
+}
+
+.logs-outcome.is-ko {
+  background: #fdecea;
+  color: #9b1c1c;
+}
+
+.logs-empty {
+  padding: 2rem 1rem !important;
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.logs-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-text-light);
+  font-size: 0.88rem;
+}
+
+.logs-pager {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.logs-pager button {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text-dark);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logs-pager button:hover:not(:disabled) {
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+.logs-pager button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .logs-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .logs-search {
+    max-width: none;
+  }
+
+  .logs-count {
+    margin-left: 0;
+  }
+}

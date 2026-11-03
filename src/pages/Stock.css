@@ -1,0 +1,88 @@
+.stock-page .stock-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.stock-page .stock-tabs button {
+  border: 1px solid #d5dbe3;
+  background: #fff;
+  color: #1d2a3a;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.stock-page .stock-tabs button.is-active {
+  background: #F16522;
+  border-color: #F16522;
+  color: #fff;
+}
+
+.stock-page .stock-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.stock-page .stock-kpi {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+
+.stock-page .stock-kpi span {
+  display: block;
+  color: #5c6b7a;
+  font-size: 0.85rem;
+}
+
+.stock-page .stock-kpi strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1.45rem;
+  color: #005BAC;
+}
+
+.stock-page .stock-codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+
+.stock-page .stock-codes button {
+  border: 1px solid #d5dbe3;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.stock-page .stock-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.stock-page .stock-table th,
+.stock-page .stock-table td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid #e6ebf1;
+  vertical-align: top;
+}
+
+.stock-page .stock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+@media (max-width: 800px) {
+  .stock-page .stock-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}

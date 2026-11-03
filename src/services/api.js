@@ -5,12 +5,13 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Intercepteur pour ajouter le token à chaque requête
+// Intercepteur pour ajouter le token a chaque requete
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['x-auth-token'] = token;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -19,18 +20,16 @@ api.interceptors.request.use(
   }
 );
 
-// Intercepteur pour gérer les erreurs 401 globalement
+// Intercepteur pour gerer les erreurs 401 globalement
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token invalide ou expiré
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');
-      // Rediriger vers la page de connexion
-      // Utilise window.location pour la redirection en dehors d'un composant React
+      localStorage.removeItem('habilitations');
       window.location.href = '/login';
     }
     return Promise.reject(error);
