@@ -707,7 +707,7 @@ const Organisation = () => {
                   <div><dt>Statut</dt><dd>{isActive(selectedPam) && (!holder || isActive(holder)) ? <StatusBadge active /> : <StatusBadge />}</dd></div>
                 </dl>
               ) : (
-                <p className="org-card-hint">Cette zone n'a pas encore de PAM. Le matricule, par exemple P04, est généré à la création.</p>
+                <p className="org-card-hint">Cette zone n'a pas encore de PAM. Le matricule, par exemple PAM0001, est généré à la création.</p>
               )}
               {selectedPam && (
                 <div className="org-row-actions">
