@@ -125,6 +125,7 @@ const Organisation = () => {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [selectedPamId, setSelectedPamId] = useState(null);
+  const [selectedZoneId, setSelectedZoneId] = useState(null);
   const [composer, setComposer] = useState(null);
   const [territoires, setTerritoires] = useState([]);
   const [zoneId, setZoneId] = useState('');
@@ -132,7 +133,7 @@ const Organisation = () => {
   const [previewCode, setPreviewCode] = useState('');
 
   const [pamForm, setPamForm] = useState({ nom: '', compte: { ...EMPTY_SEAT } });
-  const [linkForm, setLinkForm] = useState({ mode: 'create', userId: '', seat: { ...EMPTY_SEAT } });
+  const [linkForm, setLinkForm] = useState({ mode: 'create', role: 'sam', userId: '', seat: { ...EMPTY_SEAT } });
   const [eamForm, setEamForm] = useState(freshEam);
   const [eamEditId, setEamEditId] = useState(null);
   const [eamTeam, setEamTeam] = useState(null);
@@ -196,9 +197,6 @@ const Organisation = () => {
   ), [data.eams, selectedPam]);
 
   const activeSams = sams.filter(isActive);
-  const movable = (role) => data.users.filter(
-    (user) => user.role === role && isActive(user) && refId(user.pamId) !== String(selectedPamId)
-  );
 
   const submit = async (request) => {
     setSaving(true);
@@ -222,12 +220,19 @@ const Organisation = () => {
   };
 
   const openPam = (pam) => {
+    setSelectedZoneId(pam.zoneId || null);
     setSelectedPamId(pam._id);
-    setComposer(null);
     setEamEditId(null);
     setUserEditId(null);
     setError('');
     setMessage('');
+    if (!pam.zoneId) {
+      setPamForm({ zoneId: '', compte: { ...EMPTY_SEAT } });
+      setComposer('pam-territory');
+      focusEditor();
+      return;
+    }
+    setComposer(null);
   };
 
   const closeComposer = () => {
@@ -236,7 +241,7 @@ const Organisation = () => {
     setEamTeam(null);
     setUserEditId(null);
     setPamForm({ nom: '', compte: { ...EMPTY_SEAT } });
-    setLinkForm({ mode: 'create', userId: '', seat: { ...EMPTY_SEAT } });
+    setLinkForm({ mode: 'create', role: 'sam', userId: '', seat: { ...EMPTY_SEAT } });
     setEamForm(freshEam());
     setUserForm(EMPTY_USER);
     setPreviewCode('');
@@ -316,6 +321,7 @@ const Organisation = () => {
       await axios.put(`${API_BASE_URL}/api/organization/pams/${selectedPam._id}`, {
         zoneId: pamForm.zoneId,
       }, { headers: headers() });
+      setSelectedZoneId(pamForm.zoneId);
       closeComposer();
     });
   };
@@ -393,6 +399,11 @@ const Organisation = () => {
     submit(async () => {
       if (eamEditId) {
         await axios.put(`${API_BASE_URL}/api/organization/eams/${eamEditId}`, body, { headers: headers() });
+        if (eamTeam && String(eamForm.equipe.motDePasse || '').length >= 6) {
+          await axios.put(`${API_BASE_URL}/api/organization/users/${eamTeam._id}`, {
+            motDePasse: eamForm.equipe.motDePasse,
+          }, { headers: headers() });
+        }
       } else {
         await axios.post(`${API_BASE_URL}/api/organization/eams`, body, { headers: headers() });
       }
@@ -491,26 +502,50 @@ const Organisation = () => {
     focusEditor();
   };
 
+  const openZone = (zone) => {
+    const linked = data.pams.filter((pam) => String(pam.zoneId) === String(zone._id));
+    const current = linked.find(isActive) || linked[0] || null;
+    setSelectedZoneId(zone._id);
+    setSelectedPamId(current ? current._id : null);
+    closeComposer();
+    setError('');
+    setMessage('');
+  };
+
+  const startCollab = (role) => {
+    if (!selectedPam || !pamReady(selectedPam)) {
+      setError('Créez d\'abord le PAM de cette zone.');
+      return;
+    }
+    setLinkForm({ mode: 'create', role, userId: '', seat: { ...EMPTY_SEAT } });
+    setComposer('collab');
+    loadCode({ role, pamId: selectedPam._id });
+    focusEditor();
+  };
+
   const zones = data.zones || [];
+
+  useEffect(() => {
+    const list = data.zones || [];
+    if (selectedZoneId || list.length === 0) return;
+    const zone = list[0];
+    const linked = data.pams.filter((pam) => String(pam.zoneId) === String(zone._id));
+    const current = linked.find(isActive) || linked[0] || null;
+    setSelectedZoneId(zone._id);
+    setSelectedPamId(current ? current._id : null);
+  }, [data.zones, data.pams, selectedZoneId]);
+
   const zoneName = zones.find((item) => String(item._id) === String(zoneId));
   const loosePams = data.pams.filter((pam) => !zones.some((zone) => String(zone._id) === String(pam.zoneId)));
-  const pamCells = (pam) => {
-    const holders = peopleOf(pam._id, 'pam');
-    const person = holders.find(isActive) || holders[0];
-    return [
-      pam.nom,
-      personLabel(person),
-      String(peopleOf(pam._id, 'sam').length),
-      String(peopleOf(pam._id, 'cam').length),
-      String(pam.eamCount || 0),
-      isActive(pam) ? <StatusBadge active /> : <StatusBadge />,
-      <div className="org-row-actions" key={pam._id}>
-        <button type="button" className="org-btn org-btn-ghost" onClick={() => openPam(pam)}>Consulter</button>
-        <button type="button" className={isActive(pam) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('pams', pam)}>
-          {isActive(pam) ? 'Désactiver' : 'Réactiver'}
-        </button>
-      </div>,
-    ];
+
+  const selectedZone = zones.find((zone) => String(zone._id) === String(selectedZoneId)) || null;
+  const zonePams = selectedZone
+    ? data.pams.filter((pam) => String(pam.zoneId) === String(selectedZone._id))
+    : [];
+  const collaborators = [...sams, ...cams].sort((a, b) => String(a.matricule || '').localeCompare(String(b.matricule || '')));
+  const zoneEstOfficielle = (zone) => {
+    const wilayas = zone.wilayas || [];
+    return wilayas.length > 0 && wilayas.every((name) => NOUAKCHOTT.includes(name));
   };
 
   if (loading && data.pams.length === 0 && !error) {
@@ -521,96 +556,207 @@ const Organisation = () => {
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content org-page">
-        <header className="main-header">
-          <h1>{selectedPam ? selectedPam.nom : 'Organisation'}</h1>
+        <header className="main-header org-head">
+          <div>
+            <h1>Organisation</h1>
+            <p>Gérez facilement votre structure organisationnelle</p>
+          </div>
         </header>
 
-        {selectedPam ? (
-          <button type="button" className="org-back" onClick={() => { setSelectedPamId(null); closeComposer(); }}>
-            Tous les PAM
-          </button>
-        ) : (
-          <p className="org-intro">
-            Une zone regroupe une ou plusieurs wilayas. Le back-office y affecte le PAM, et peut le changer de zone.
-            Nouakchott-Nord, Nouakchott-Ouest et Nouakchott-Sud sont chacune une zone : toutes les moughataas et localités de la wilaya.
-            Le matricule reste court : P01, S01, C01, E01.
-          </p>
-        )}
+        <section className="org-flow" aria-label="Chaîne d'organisation">
+          <article className="org-flow-card org-flow-zone">
+            <strong>Zone</strong>
+            <span>Regroupe une ou plusieurs wilayas</span>
+          </article>
+          <span className="org-flow-arrow" aria-hidden="true">→</span>
+          <article className="org-flow-card org-flow-pam">
+            <strong>PAM</strong>
+            <span>Responsable de la zone et de son organisation</span>
+          </article>
+          <span className="org-flow-arrow" aria-hidden="true">→</span>
+          <div className="org-flow-pair">
+            <article className="org-flow-card org-flow-sam">
+              <strong>SAM</strong>
+              <span>Supervise les équipes</span>
+            </article>
+            <article className="org-flow-card org-flow-cam">
+              <strong>CAM</strong>
+              <span>Valide les marchands de grande taille</span>
+            </article>
+          </div>
+          <span className="org-flow-arrow" aria-hidden="true">→</span>
+          <article className="org-flow-card org-flow-team">
+            <strong>Équipes</strong>
+            <span>Chaque équipe a un SAM et deux membres</span>
+          </article>
+        </section>
 
         {error && <div className="org-alert org-alert-error">{error}</div>}
         {message && <div className="org-alert org-alert-ok">{message}</div>}
 
-        {!selectedPam && (
-          <form className="card org-form" onSubmit={saveZone}>
-            <div className="card-header">
-              <h3>{zoneDraft.id ? 'Modifier la zone' : 'Nouvelle zone'}</h3>
-              <p className="org-card-hint">Le nom est libre. Une wilaya ne peut appartenir qu'à une seule zone. Nouakchott-Nord, Nouakchott-Ouest et Nouakchott-Sud sont déjà des zones.</p>
-            </div>
-            <div className="card-body org-form-grid">
-              <Field label="Nom de la zone">
-                <input className="form-control" value={zoneDraft.nom} onChange={(e) => setZoneDraft({ ...zoneDraft, nom: e.target.value })} placeholder="Tiris et Adrar" />
-              </Field>
-              <div className="org-wilayas">
-                {territoires.map((item) => {
-                  const owner = zones.find((zone) => String(zone._id) !== String(zoneDraft.id) && (zone.wilayas || []).includes(item.region));
-                  return (
-                    <label key={item.region}>
-                      <input
-                        type="checkbox"
-                        checked={zoneDraft.wilayas.includes(item.region)}
-                        disabled={Boolean(owner)}
-                        onChange={() => setZoneDraft((current) => ({
-                          ...current,
-                          wilayas: current.wilayas.includes(item.region)
-                            ? current.wilayas.filter((name) => name !== item.region)
-                            : [...current.wilayas, item.region],
-                        }))}
-                      />
-                      <span>{item.region}{owner ? ` · ${owner.nom}` : ''}</span>
-                    </label>
-                  );
-                })}
+        <section className="org-panel">
+          <div className="org-section-head">
+            <h2>Zones</h2>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setZoneDraft({ id: '', nom: '', wilayas: [] });
+                setComposer('zone');
+                focusEditor();
+              }}
+            >
+              + Nouvelle zone
+            </button>
+          </div>
+          {composer === 'zone' && (
+            <form id="org-editor" className="card org-form" onSubmit={saveZone}>
+              <div className="card-header">
+                <h3>{zoneDraft.id ? 'Modifier la zone' : 'Nouvelle zone'}</h3>
+                <p className="org-card-hint">Une wilaya n'appartient qu'à une seule zone. Nouakchott-Nord, Nouakchott-Ouest et Nouakchott-Sud existent déjà.</p>
               </div>
-              <FormActions saving={saving} label={zoneDraft.id ? 'Enregistrer la zone' : 'Créer la zone'} onCancel={() => setZoneDraft({ id: '', nom: '', wilayas: [] })} />
-            </div>
-          </form>
+              <div className="card-body org-form-grid">
+                <Field label="Nom de la zone">
+                  <input className="form-control" value={zoneDraft.nom} onChange={(e) => setZoneDraft({ ...zoneDraft, nom: e.target.value })} placeholder="Tiris et Adrar" />
+                </Field>
+                <div className="org-wilayas">
+                  {territoires.map((item) => {
+                    const owner = zones.find((zone) => String(zone._id) !== String(zoneDraft.id) && (zone.wilayas || []).includes(item.region));
+                    return (
+                      <label key={item.region}>
+                        <input
+                          type="checkbox"
+                          checked={zoneDraft.wilayas.includes(item.region)}
+                          disabled={Boolean(owner)}
+                          onChange={() => setZoneDraft((current) => ({
+                            ...current,
+                            wilayas: current.wilayas.includes(item.region)
+                              ? current.wilayas.filter((name) => name !== item.region)
+                              : [...current.wilayas, item.region],
+                          }))}
+                        />
+                        <span>{item.region}{owner ? ` · ${owner.nom}` : ''}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <FormActions saving={saving} label={zoneDraft.id ? 'Enregistrer la zone' : 'Créer la zone'} onCancel={closeComposer} />
+              </div>
+            </form>
+          )}
+          <OrgTable
+            headers={['Zone', 'Wilayas', 'PAM associé', 'Statut', 'Actions']}
+            rows={zones.map((zone) => {
+              const linked = data.pams.filter((pam) => String(pam.zoneId) === String(zone._id));
+              const current = String(zone._id) === String(selectedZoneId);
+              return [
+                <span className={current ? 'org-zone-name is-current' : 'org-zone-name'} key={zone._id}>{zone.nom}</span>,
+                String((zone.wilayas || []).length),
+                linked.length ? linked.map((pam) => pam.nom).join(', ') : '—',
+                <StatusBadge key={`${zone._id}-s`} active />,
+                <div className="org-row-actions" key={`${zone._id}-a`}>
+                  <button type="button" className="org-btn org-btn-ghost" onClick={() => openZone(zone)}>Consulter</button>
+                  <button type="button" className="org-btn org-btn-ghost" onClick={() => { setZoneDraft({ id: zone._id, nom: zone.nom, wilayas: [...(zone.wilayas || [])] }); setComposer('zone'); focusEditor(); }}>Wilayas</button>
+                  {!zoneEstOfficielle(zone) && (
+                    <button type="button" className="org-btn org-btn-danger" onClick={() => removeZone(zone)}>Supprimer</button>
+                  )}
+                </div>,
+              ];
+            })}
+          />
+        </section>
+
+        {selectedZone && (
+          <section className="org-split">
+            <article className="org-panel org-pam-card">
+              <div className="org-section-head">
+                <h2>Détails du PAM</h2>
+                {zonePams.length === 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={!(selectedZone.wilayas || []).length}
+                    onClick={() => {
+                      closeComposer();
+                      setZoneId(selectedZone._id);
+                      setComposer('pam');
+                      loadCode({ role: 'pam', zoneId: selectedZone._id });
+                      focusEditor();
+                    }}
+                  >
+                    Créer le PAM
+                  </button>
+                )}
+              </div>
+              {zonePams.length > 1 && (
+                <Field label="PAM de la zone">
+                  <select className="form-control" value={selectedPamId || ''} onChange={(e) => { setSelectedPamId(e.target.value); closeComposer(); }}>
+                    {zonePams.map((pam) => <option key={pam._id} value={pam._id}>{pam.nom}</option>)}
+                  </select>
+                </Field>
+              )}
+              {selectedPam ? (
+                <dl className="org-facts">
+                  <div><dt>Zone d'affectation</dt><dd>{selectedZone.nom}</dd></div>
+                  <div><dt>Nom du compte</dt><dd>{selectedPam.nom}</dd></div>
+                  <div><dt>Responsable</dt><dd>{personLabel(holder)}</dd></div>
+                  <div><dt>Statut</dt><dd>{isActive(selectedPam) && (!holder || isActive(holder)) ? <StatusBadge active /> : <StatusBadge />}</dd></div>
+                </dl>
+              ) : (
+                <p className="org-card-hint">Cette zone n'a pas encore de PAM. Le matricule, par exemple P04, est généré à la création.</p>
+              )}
+              {selectedPam && (
+                <div className="org-row-actions">
+                  {holder && <button type="button" className="org-btn org-btn-ghost" onClick={() => startUserEdit(holder)}>Modifier</button>}
+                  <button type="button" className="org-btn org-btn-ghost" onClick={() => {
+                    setPamForm({ zoneId: selectedPam.zoneId || '', compte: { ...EMPTY_SEAT } });
+                    setComposer('pam-territory');
+                    focusEditor();
+                  }}>Changer la zone</button>
+                  <button
+                    type="button"
+                    className={(holder ? isActive(holder) : isActive(selectedPam)) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'}
+                    onClick={() => toggleActif(holder ? 'users' : 'pams', holder || selectedPam)}
+                  >
+                    {(holder ? isActive(holder) : isActive(selectedPam)) ? 'Désactiver' : 'Réactiver'}
+                  </button>
+                </div>
+              )}
+            </article>
+
+            <article className="org-panel">
+              <div className="org-section-head">
+                <div>
+                  <h2>Collaborateurs{selectedPam ? ` du PAM (${selectedPam.nom})` : ''}</h2>
+                  <p>Un seul formulaire. Le rôle SAM ou CAM fixe les droits.</p>
+                </div>
+                <button type="button" className="btn btn-primary" onClick={() => startCollab(linkForm.role || 'sam')} disabled={!selectedPam}>
+                  Ajouter un collaborateur
+                </button>
+              </div>
+              <OrgTable
+                headers={['Nom', 'Matricule', 'Rôle', 'Statut', 'Actions']}
+                rows={collaborators.map((user) => [
+                  [user.prenom, user.nom].filter(Boolean).join(' ') || '—',
+                  user.matricule,
+                  <span key={user._id} className={user.role === 'cam' ? 'org-role org-role-cam' : 'org-role org-role-sam'}>{user.role === 'cam' ? 'CAM' : 'SAM'}</span>,
+                  isActive(user) ? <StatusBadge active /> : <StatusBadge />,
+                  <div className="org-row-actions" key={`${user._id}-a`}>
+                    <button type="button" className="org-btn org-btn-ghost" onClick={() => startUserEdit(user)}>Modifier</button>
+                    <button type="button" className={isActive(user) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('users', user)}>
+                      {isActive(user) ? 'Désactiver' : 'Réactiver'}
+                    </button>
+                  </div>,
+                ])}
+              />
+            </article>
+          </section>
         )}
 
-        {!selectedPam && zones.map((zone) => (
-          <section className="org-section" key={zone._id}>
-            <div className="org-section-head">
-              <div>
-                <h2>{zone.nom}</h2>
-                <p>{(zone.wilayas || []).length ? zone.wilayas.join(', ') : 'Aucune wilaya pour le moment.'}</p>
-              </div>
-              <div className="org-row-actions">
-                <button type="button" className="org-btn org-btn-ghost" onClick={() => setZoneDraft({ id: zone._id, nom: zone.nom, wilayas: [...(zone.wilayas || [])] })}>Renommer et wilayas</button>
-                <button type="button" className="org-btn org-btn-danger" onClick={() => removeZone(zone)}>Supprimer</button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={!(zone.wilayas || []).length}
-                  onClick={() => {
-                    closeComposer();
-                    setZoneId(zone._id);
-                    setComposer('pam');
-                    loadCode({ role: 'pam', zoneId: zone._id });
-                    focusEditor();
-                  }}
-                >Nouveau PAM</button>
-              </div>
-            </div>
-            <OrgTable
-              headers={['PAM', 'Compte', 'SAM', 'CAM', 'Équipes', 'Statut', 'Actions']}
-              rows={data.pams.filter((pam) => String(pam.zoneId) === String(zone._id)).map(pamCells)}
-            />
-          </section>
-        ))}
-
-        {!selectedPam && composer === 'pam' && (
+        {composer === 'pam' && (
           <PamAccountForm
             title="Nouveau PAM"
-            hint={`Zone ${zoneName ? zoneName.nom : ''}. Le matricule est court, par exemple P01. Saisissez seulement l'identité du titulaire.`}
+            hint={`Zone ${zoneName ? zoneName.nom : ''}. Le compte et le matricule sont créés ensemble.`}
             code={previewCode}
             pamForm={pamForm}
             setPamForm={setPamForm}
@@ -620,12 +766,146 @@ const Organisation = () => {
           />
         )}
 
-        {!selectedPam && loosePams.length > 0 && (
-          <section className="org-section">
+        {composer === 'pam-territory' && selectedPam && (
+          <form id="org-editor" className="card org-form" onSubmit={saveTerritory}>
+            <div className="card-header">
+              <h3>Zone du PAM</h3>
+              <p className="org-card-hint">Le matricule ne change pas. Les équipes enrôlent ensuite dans la nouvelle zone.</p>
+            </div>
+            <div className="card-body org-form-grid">
+              <Field label="Zone d'affectation">
+                <select className="form-control" required value={pamForm.zoneId || ''} onChange={(e) => setPamForm({ ...pamForm, zoneId: e.target.value })}>
+                  <option value="">Choisir</option>
+                  {zones.filter((zone) => (zone.wilayas || []).length).map((zone) => (
+                    <option key={zone._id} value={zone._id}>{zone.nom}</option>
+                  ))}
+                </select>
+              </Field>
+              <FormActions saving={saving} label="Affecter" onCancel={closeComposer} />
+            </div>
+          </form>
+        )}
+
+        {composer === 'collab' && selectedPam && (
+          <form id="org-editor" className="card org-form" onSubmit={(event) => saveLink(event, linkForm.role)}>
+            <div className="card-header">
+              <h3>Ajouter un collaborateur</h3>
+              <p className="org-card-hint">SAM : il peut superviser plusieurs équipes. CAM : il valide les marchands Gros de toute la zone du PAM.</p>
+            </div>
+            <div className="card-body org-form-grid">
+              <div className="org-choice">
+                <button type="button" className={linkForm.role === 'sam' ? 'is-active' : ''} onClick={() => { setLinkForm({ ...linkForm, role: 'sam' }); loadCode({ role: 'sam', pamId: selectedPam._id }); }}>SAM</button>
+                <button type="button" className={linkForm.role === 'cam' ? 'is-active' : ''} onClick={() => { setLinkForm({ ...linkForm, role: 'cam' }); loadCode({ role: 'cam', pamId: selectedPam._id }); }}>CAM</button>
+              </div>
+              <Field label="Matricule">
+                <input className="form-control org-code" readOnly value={previewCode || 'Calcul…'} />
+              </Field>
+              <IdentityBlock title="Identité" hint="Le matricule est généré. Il sert à la connexion." seat={linkForm.seat} onChange={(seat) => setLinkForm({ ...linkForm, seat })} />
+              <FormActions saving={saving} label="Enregistrer" onCancel={closeComposer} />
+            </div>
+          </form>
+        )}
+
+        {composer === 'user' && (
+          <form id="org-editor" className="card org-form" onSubmit={saveUser}>
+            <div className="card-header">
+              <h3>Modifier le compte</h3>
+              <p className="org-card-hint">Matricule {userForm.matricule}. Laissez le mot de passe vide pour le conserver.</p>
+            </div>
+            <div className="card-body org-form-grid">
+              <Field label="Nom"><input className="form-control" required value={userForm.nom} onChange={(e) => setUserForm({ ...userForm, nom: e.target.value })} /></Field>
+              <Field label="Prénom"><input className="form-control" required value={userForm.prenom} onChange={(e) => setUserForm({ ...userForm, prenom: e.target.value })} /></Field>
+              <NniField value={userForm.nni} onChange={(nni) => setUserForm({ ...userForm, nni })} />
+              <MsisdnField value={userForm.moovMoneyMsisdn} onChange={(moovMoneyMsisdn) => setUserForm({ ...userForm, moovMoneyMsisdn })} />
+              <Field label="Nouveau mot de passe"><input className="form-control" type="password" value={userForm.motDePasse} minLength={userForm.motDePasse ? 6 : undefined} onChange={(e) => setUserForm({ ...userForm, motDePasse: e.target.value })} /></Field>
+              <FormActions saving={saving} label="Enregistrer" onCancel={closeComposer} />
+            </div>
+          </form>
+        )}
+
+        {selectedZone && (
+          <section className="org-panel">
+            <div className="org-section-head">
+              <div>
+                <h2>Équipes</h2>
+                <p>Le compte est généré avec l'équipe. Elle enrôle dans la zone du PAM. Deux membres, un SAM responsable.</p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!selectedPam}
+                onClick={() => {
+                  if (!pamReady(selectedPam)) {
+                    setError('Créez d\'abord le PAM de cette zone.');
+                    return;
+                  }
+                  if (!activeSams.length) {
+                    setError('Ajoutez d\'abord un collaborateur SAM.');
+                    return;
+                  }
+                  startTeam();
+                }}
+              >
+                + Créer une équipe
+              </button>
+            </div>
+            {composer === 'eam' && (
+              <form id="org-editor" className="card org-form" onSubmit={saveEam}>
+                <div className="card-header">
+                  <h3>{eamEditId ? 'Équipe' : 'Nouvelle équipe'}</h3>
+                  <p className="org-card-hint">Le SAM est choisi parmi les collaborateurs de ce PAM. Le matricule de l'équipe est généré.</p>
+                </div>
+                <div className="card-body org-form-grid">
+                  <Field label="Matricule">
+                    <input className="form-control org-code" readOnly value={previewCode || (eamEditId ? eamForm.nom : '')} />
+                  </Field>
+                  <Field label="SAM responsable">
+                    <select className="form-control" required value={eamForm.samId} onChange={(e) => setEamForm({ ...eamForm, samMode: 'existing', samId: e.target.value })}>
+                      <option value="">Choisir</option>
+                      {activeSams.map((sam) => <option key={sam._id} value={sam._id}>{personLabel(sam)}</option>)}
+                    </select>
+                  </Field>
+                  <Field label={eamTeam ? 'Nouveau mot de passe du compte' : 'Mot de passe du compte'}>
+                    <input
+                      className="form-control"
+                      type="password"
+                      required={!eamTeam}
+                      minLength={eamForm.equipe.motDePasse ? 6 : undefined}
+                      value={eamForm.equipe.motDePasse}
+                      onChange={(e) => setEamForm({ ...eamForm, equipe: { ...eamForm.equipe, motDePasse: e.target.value } })}
+                    />
+                  </Field>
+                  <MemberBlock title="Membre 1" hint="NNI et MSISDN de la matrice." member={eamForm.membre1} onChange={(membre1) => setEamForm({ ...eamForm, membre1 })} />
+                  <MemberBlock title="Membre 2" hint="NNI et MSISDN de la matrice." member={eamForm.membre2} onChange={(membre2) => setEamForm({ ...eamForm, membre2 })} />
+                  <FormActions saving={saving} label={eamEditId ? 'Enregistrer' : 'Créer l\'équipe'} onCancel={closeComposer} />
+                </div>
+              </form>
+            )}
+            <OrgTable
+              headers={['Équipe', 'SAM responsable', 'Membres', 'Périmètre', 'Statut', 'Actions']}
+              rows={teams.map((eam) => [
+                eam.nom,
+                personLabel(eam.samId),
+                membersLabel(eam),
+                selectedZone.nom,
+                isActive(eam) ? <StatusBadge active /> : <StatusBadge />,
+                <div className="org-row-actions" key={eam._id}>
+                  <button type="button" className="org-btn org-btn-ghost" onClick={() => startTeamEdit(eam)}>Détails</button>
+                  <button type="button" className={isActive(eam) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('eams', eam)}>
+                    {isActive(eam) ? 'Désactiver' : 'Réactiver'}
+                  </button>
+                </div>,
+              ])}
+            />
+          </section>
+        )}
+
+        {loosePams.length > 0 && (
+          <section className="org-panel">
             <div className="org-section-head">
               <div>
                 <h2>PAM à affecter</h2>
-                <p>Ouvrez le PAM pour le placer dans une zone. Tant qu'il reste sur une moughataa, l'équipe ne voit que cette moughataa.</p>
+                <p>Ces PAM ne sont pas encore dans une zone. Ouvrez-en un, puis changez sa zone.</p>
               </div>
             </div>
             <OrgTable
@@ -638,284 +918,11 @@ const Organisation = () => {
                   terrainLabel(pam, zones),
                   personLabel(person),
                   isActive(pam) ? <StatusBadge active /> : <StatusBadge />,
-                  <button key={pam._id} type="button" className="org-btn org-btn-ghost" onClick={() => openPam(pam)}>Consulter</button>,
+                  <button key={pam._id} type="button" className="org-btn org-btn-ghost" onClick={() => openPam(pam)}>Ouvrir</button>,
                 ];
               })}
             />
           </section>
-        )}
-
-        {selectedPam && (
-          <>
-            <div className="org-summary">
-              <article>
-                <span>Terrain</span>
-                <strong>{terrainLabel(selectedPam, zones)}</strong>
-              </article>
-              <article>
-                <span>Code</span>
-                <strong>{selectedPam.nom}</strong>
-              </article>
-              <article>
-                <span>Compte PAM</span>
-                <strong>{personLabel(holder)}</strong>
-              </article>
-              <article>
-                <span>SAM</span>
-                <strong>{sams.length}</strong>
-              </article>
-              <article>
-                <span>CAM</span>
-                <strong>{cams.length}</strong>
-              </article>
-              <article>
-                <span>Équipes</span>
-                <strong>{teams.length}</strong>
-              </article>
-            </div>
-
-            <div className="org-row-actions" style={{ marginBottom: '1.25rem' }}>
-              <button type="button" className="org-btn org-btn-ghost" onClick={() => {
-                setPamForm({
-                  zoneId: selectedPam.zoneId || '',
-                  compte: { ...EMPTY_SEAT },
-                });
-                setComposer('pam-territory');
-                focusEditor();
-              }}>Changer l'affectation</button>
-              {holder && (
-                <button type="button" className="org-btn org-btn-ghost" onClick={() => startUserEdit(holder)}>Modifier le compte</button>
-              )}
-              {holder && (
-                <button type="button" className={isActive(holder) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('users', holder)}>
-                  {isActive(holder) ? 'Désactiver le compte' : 'Réactiver le compte'}
-                </button>
-              )}
-              {!holder && (
-                <button type="button" className="org-btn org-btn-ghost" onClick={() => {
-                  if (!pamReady(selectedPam)) {
-                    setError('Rattachez d\'abord ce PAM à une zone.');
-                    return;
-                  }
-                  setLinkForm({ mode: 'create', userId: '', seat: { ...EMPTY_SEAT } });
-                  setComposer('holder');
-                  loadCode({ role: 'pam', pamId: selectedPam._id });
-                  focusEditor();
-                }}>Créer le compte</button>
-              )}
-              <button type="button" className={isActive(selectedPam) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('pams', selectedPam)}>
-                {isActive(selectedPam) ? 'Désactiver' : 'Réactiver'}
-              </button>
-            </div>
-
-            {composer === 'pam-territory' && (
-              <form id="org-editor" className="card org-form" onSubmit={saveTerritory}>
-                <div className="card-header">
-                  <h3>Affectation du PAM</h3>
-                  <p className="org-card-hint">Le matricule ne change pas. Dès l'enregistrement, les équipes enrôlent dans le nouveau terrain.</p>
-                </div>
-                <div className="card-body org-form-grid">
-                  <Field label="Zone">
-                    <select className="form-control" required value={pamForm.zoneId || ''} onChange={(e) => setPamForm({ ...pamForm, zoneId: e.target.value })}>
-                      <option value="">Choisir</option>
-                      {zones.filter((zone) => (zone.wilayas || []).length).map((zone) => (
-                        <option key={zone._id} value={zone._id}>{zone.nom}</option>
-                      ))}
-                    </select>
-                  </Field>
-                  <FormActions saving={saving} label="Affecter" onCancel={closeComposer} />
-                </div>
-              </form>
-            )}
-
-            {composer === 'holder' && (
-              <form id="org-editor" className="card org-form" onSubmit={(event) => saveLink(event, 'pam')}>
-                <div className="card-header">
-                  <h3>Compte du PAM</h3>
-                  <p className="org-card-hint">Ce PAM n'a pas encore de titulaire. Le compte est créé maintenant.</p>
-                </div>
-                <div className="card-body org-form-grid">
-                  <IdentityBlock title="Titulaire" hint="Le matricule reprend le code du PAM." seat={linkForm.seat} onChange={(seat) => setLinkForm({ ...linkForm, seat })} />
-                  <FormActions saving={saving} label="Créer le compte" onCancel={closeComposer} />
-                </div>
-              </form>
-            )}
-
-            {composer === 'user' && (
-              <form id="org-editor" className="card org-form" onSubmit={saveUser}>
-                <div className="card-header">
-                  <h3>Modifier le compte</h3>
-                  <p className="org-card-hint">Matricule {userForm.matricule}. Laissez le mot de passe vide pour le conserver.</p>
-                </div>
-                <div className="card-body org-form-grid">
-                  <Field label="Nom"><input className="form-control" required value={userForm.nom} onChange={(e) => setUserForm({ ...userForm, nom: e.target.value })} /></Field>
-                  <Field label="Prénom"><input className="form-control" required value={userForm.prenom} onChange={(e) => setUserForm({ ...userForm, prenom: e.target.value })} /></Field>
-                  <NniField value={userForm.nni} onChange={(nni) => setUserForm({ ...userForm, nni })} />
-                  <MsisdnField value={userForm.moovMoneyMsisdn} onChange={(moovMoneyMsisdn) => setUserForm({ ...userForm, moovMoneyMsisdn })} />
-                  <Field label="Nouveau mot de passe"><input className="form-control" type="password" value={userForm.motDePasse} minLength={userForm.motDePasse ? 6 : undefined} onChange={(e) => setUserForm({ ...userForm, motDePasse: e.target.value })} /></Field>
-                  <FormActions saving={saving} label="Enregistrer" onCancel={closeComposer} />
-                </div>
-              </form>
-            )}
-
-            <section className="org-section">
-              <div className="org-section-head">
-                <div>
-                  <h2>SAM</h2>
-                  <p>Rattachés à ce PAM. Un SAM peut superviser plusieurs équipes.</p>
-                </div>
-                <button type="button" className="btn btn-primary" onClick={() => {
-                  if (!pamReady(selectedPam)) {
-                    setError('Rattachez d\'abord ce PAM à une zone.');
-                    return;
-                  }
-                  setLinkForm({ mode: 'create', userId: '', seat: { ...EMPTY_SEAT } });
-                  setComposer('sam');
-                  loadCode({ role: 'sam', pamId: selectedPam._id });
-                  focusEditor();
-                }}>Ajouter un SAM</button>
-              </div>
-              {composer === 'sam' && (
-                <LinkForm
-                  roleLabel="SAM"
-                  hint="Le matricule est généré. Saisissez l'identité, ou affectez un SAM déjà existant."
-                  code={previewCode}
-                  linkForm={linkForm}
-                  setLinkForm={setLinkForm}
-                  candidates={movable('sam')}
-                  saving={saving}
-                  onSubmit={(event) => saveLink(event, 'sam')}
-                  onCancel={closeComposer}
-                />
-              )}
-              <PeopleTable people={sams} onEdit={startUserEdit} onToggle={(user) => toggleActif('users', user)} extraHeader="Équipes" extraCell={(user) => String(user.eamCount || 0)} />
-            </section>
-
-            <section className="org-section">
-              <div className="org-section-head">
-                <div>
-                  <h2>CAM</h2>
-                  <p>Même niveau que le SAM. Il valide les marchands de taille Gros.</p>
-                </div>
-                <button type="button" className="btn btn-primary" onClick={() => {
-                  if (!pamReady(selectedPam)) {
-                    setError('Rattachez d\'abord ce PAM à une zone.');
-                    return;
-                  }
-                  setLinkForm({ mode: 'create', userId: '', seat: { ...EMPTY_SEAT } });
-                  setComposer('cam');
-                  loadCode({ role: 'cam', pamId: selectedPam._id });
-                  focusEditor();
-                }}>Ajouter un CAM</button>
-              </div>
-              {composer === 'cam' && (
-                <LinkForm
-                  roleLabel="CAM"
-                  hint="Le matricule est généré. Saisissez l'identité, ou affectez un CAM déjà existant."
-                  code={previewCode}
-                  linkForm={linkForm}
-                  setLinkForm={setLinkForm}
-                  candidates={movable('cam')}
-                  saving={saving}
-                  onSubmit={(event) => saveLink(event, 'cam')}
-                  onCancel={closeComposer}
-                />
-              )}
-              <PeopleTable people={cams} onEdit={startUserEdit} onToggle={(user) => toggleActif('users', user)} />
-            </section>
-
-            <section className="org-section">
-              <div className="org-section-head">
-                <div>
-                  <h2>Équipes</h2>
-                  <p>Un seul compte, avec un matricule court du type E01. L'équipe enrôle dans toutes les moughataas et localités de la zone du PAM.</p>
-                </div>
-                <button type="button" className="btn btn-primary" onClick={() => {
-                  if (!pamReady(selectedPam)) {
-                    setError('Rattachez d\'abord ce PAM à une zone.');
-                    return;
-                  }
-                  setPreviewCode('');
-                  startTeam();
-                }}>Nouvelle équipe</button>
-              </div>
-              {composer === 'eam' && (
-                <form id="org-editor" className="card org-form" onSubmit={saveEam}>
-                  <div className="card-header">
-                    <h3>{eamEditId ? 'Équipe' : 'Nouvelle équipe'}</h3>
-                    <p className="org-card-hint">
-                      {eamEditId
-                        ? 'Affectez un SAM de ce PAM, ou créez-en un nouveau. Les deux MSISDN restent dans la matrice.'
-                        : 'Le SAM, le compte et les deux membres font partie de la même création.'}
-                    </p>
-                  </div>
-                  <div className="card-body org-form-grid">
-                    <Field label="Code de l'équipe">
-                      <input className="form-control org-code" readOnly value={previewCode || (eamEditId ? eamForm.nom : '')} />
-                    </Field>
-                    <div className="org-choice">
-                      <button type="button" className={eamForm.samMode === 'existing' ? 'is-active' : ''} onClick={() => setEamForm({ ...eamForm, samMode: 'existing' })}>
-                        Affecter un SAM
-                      </button>
-                      <button type="button" className={eamForm.samMode === 'new' ? 'is-active' : ''} onClick={() => setEamForm({ ...eamForm, samMode: 'new', samId: '' })}>
-                        Créer un SAM
-                      </button>
-                    </div>
-                    {eamForm.samMode === 'existing' ? (
-                      <Field label="SAM de ce PAM">
-                        <select className="form-control" required value={eamForm.samId} onChange={(e) => setEamForm({ ...eamForm, samId: e.target.value })}>
-                          <option value="">Choisir</option>
-                          {activeSams.map((sam) => <option key={sam._id} value={sam._id}>{personLabel(sam)}</option>)}
-                        </select>
-                      </Field>
-                    ) : (
-                      <IdentityBlock title="Nouveau SAM" hint="Le matricule est généré. Saisissez l'identité et le mot de passe." seat={eamForm.sam} onChange={(sam) => setEamForm({ ...eamForm, sam })} />
-                    )}
-                    {eamTeam ? (
-                      <SeatBlock title="Compte de l'équipe" person={eamTeam} seat={eamForm.equipe} onChange={() => {}} />
-                    ) : (
-                      <div className="org-seat">
-                        <div className="org-seat-head">
-                          <h4>Compte de l'équipe</h4>
-                          <p className="org-seat-hint">Le matricule est le code généré. Une nouvelle connexion déconnecte l'autre téléphone.</p>
-                        </div>
-                        <div className="org-seat-grid">
-                          <Field label="Mot de passe">
-                            <input className="form-control" type="password" required minLength={6} value={eamForm.equipe.motDePasse} onChange={(e) => setEamForm({ ...eamForm, equipe: { ...eamForm.equipe, motDePasse: e.target.value } })} />
-                          </Field>
-                        </div>
-                      </div>
-                    )}
-                    <MemberBlock title="Membre 1" hint="NNI et MSISDN envoyés dans la matrice." member={eamForm.membre1} onChange={(membre1) => setEamForm({ ...eamForm, membre1 })} />
-                    <MemberBlock title="Membre 2" hint="NNI et MSISDN envoyés dans la matrice." member={eamForm.membre2} onChange={(membre2) => setEamForm({ ...eamForm, membre2 })} />
-                    <FormActions saving={saving} label={eamEditId ? 'Enregistrer' : 'Créer l\'équipe'} onCancel={closeComposer} />
-                  </div>
-                </form>
-              )}
-              <OrgTable
-                headers={['Équipe', 'SAM', 'Compte', 'Membres', 'Statut', 'Actions']}
-                rows={teams.map((eam) => {
-                  const equipe = eam.equipe || data.users.find(
-                    (user) => user.role === 'aam' && refId(user.eamId) === String(eam._id) && isActive(user)
-                  );
-                  return [
-                    eam.nom,
-                    personLabel(eam.samId),
-                    personLabel(equipe),
-                    membersLabel(eam),
-                    isActive(eam) ? <StatusBadge active /> : <StatusBadge />,
-                    <div className="org-row-actions" key={eam._id}>
-                      <button type="button" className="org-btn org-btn-ghost" onClick={() => startTeamEdit(eam)}>Affecter</button>
-                      {equipe && <button type="button" className="org-btn org-btn-ghost" onClick={() => startUserEdit(equipe)}>Compte</button>}
-                      <button type="button" className={isActive(eam) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('eams', eam)}>
-                        {isActive(eam) ? 'Désactiver' : 'Réactiver'}
-                      </button>
-                    </div>,
-                  ];
-                })}
-              />
-            </section>
-          </>
         )}
       </main>
     </div>
@@ -945,96 +952,11 @@ function PamAccountForm({ title, hint, code, pamForm, setPamForm, saving, onSubm
   );
 }
 
-function LinkForm({ roleLabel, hint, code, linkForm, setLinkForm, candidates, saving, onSubmit, onCancel }) {
-  return (
-    <form id="org-editor" className="card org-form" onSubmit={onSubmit}>
-      <div className="card-header">
-        <h3>{roleLabel}</h3>
-        <p className="org-card-hint">{hint}</p>
-      </div>
-      <div className="card-body org-form-grid">
-        <div className="org-choice">
-          <button type="button" className={linkForm.mode === 'create' ? 'is-active' : ''} onClick={() => setLinkForm({ ...linkForm, mode: 'create' })}>
-            Créer le compte
-          </button>
-          <button type="button" className={linkForm.mode === 'assign' ? 'is-active' : ''} onClick={() => setLinkForm({ ...linkForm, mode: 'assign' })}>
-            Affecter un {roleLabel} existant
-          </button>
-        </div>
-        {linkForm.mode === 'assign' ? (
-          <Field label={roleLabel}>
-            <select className="form-control" required value={linkForm.userId} onChange={(e) => setLinkForm({ ...linkForm, userId: e.target.value })}>
-              <option value="">Choisir</option>
-              {candidates.map((user) => <option key={user._id} value={user._id}>{personLabel(user)}</option>)}
-            </select>
-          </Field>
-        ) : (
-          <>
-            <Field label="Code">
-              <input className="form-control org-code" readOnly value={code || 'Calcul…'} />
-            </Field>
-            <IdentityBlock title={`Identité ${roleLabel}`} seat={linkForm.seat} onChange={(seat) => setLinkForm({ ...linkForm, seat })} />
-          </>
-        )}
-        <FormActions saving={saving} label={linkForm.mode === 'assign' ? 'Affecter' : `Créer le ${roleLabel}`} onCancel={onCancel} />
-      </div>
-    </form>
-  );
-}
-
-function PeopleTable({ people, onEdit, onToggle, extraHeader, extraCell }) {
-  const headers = ['Nom', 'Matricule', 'NNI', 'MSISDN', ...(extraHeader ? [extraHeader] : []), 'Statut', 'Actions'];
-  return (
-    <OrgTable
-      headers={headers}
-      rows={people.map((user) => [
-        [user.prenom, user.nom].filter(Boolean).join(' ') || '—',
-        user.matricule,
-        user.nni || '—',
-        formatMsisdn(user.moovMoneyMsisdn),
-        ...(extraCell ? [extraCell(user)] : []),
-        isActive(user) ? <StatusBadge active /> : <StatusBadge />,
-        <RowActions key={user._id} onEdit={() => onEdit(user)} onToggle={() => onToggle(user)} active={isActive(user)} />,
-      ])}
-    />
-  );
-}
-
 function FormActions({ saving, label, onCancel }) {
   return (
     <div className="org-form-actions">
       <button className="btn btn-primary" type="submit" disabled={saving}>{label}</button>
       <button className="org-btn org-btn-ghost" type="button" onClick={onCancel}>Annuler</button>
-    </div>
-  );
-}
-
-function SeatBlock({ title, hint, person, seat, onChange, required = false }) {
-  if (person) {
-    return (
-      <div className="org-seat">
-        <div className="org-seat-head">
-          <h4>{title}</h4>
-        </div>
-        <p className="org-person">{personLabel(person)}</p>
-      </div>
-    );
-  }
-  const set = (key) => (event) => onChange({ ...seat, [key]: event.target.value });
-  return (
-    <div className="org-seat">
-      <div className="org-seat-head">
-        <h4>{title}</h4>
-        {hint ? <p className="org-seat-hint">{hint}</p> : null}
-      </div>
-      <div className="org-seat-grid">
-        <Field label="Matricule"><input className="form-control" required={required} value={seat.matricule} onChange={set('matricule')} /></Field>
-        <Field label="Nom"><input className="form-control" required={required} value={seat.nom} onChange={set('nom')} /></Field>
-        <Field label="Prénom"><input className="form-control" required={required} value={seat.prenom} onChange={set('prenom')} /></Field>
-        <NniField value={seat.nni} onChange={(nni) => onChange({ ...seat, nni })} required={required} />
-        <MsisdnField value={seat.moovMoneyMsisdn} onChange={(moovMoneyMsisdn) => onChange({ ...seat, moovMoneyMsisdn })} required={required} />
-        <Field label="Mot de passe"><input className="form-control" type="password" required={required} minLength={required ? 6 : undefined} value={seat.motDePasse} onChange={set('motDePasse')} /></Field>
-      </div>
     </div>
   );
 }
@@ -1131,17 +1053,6 @@ function Field({ label, children }) {
 
 function StatusBadge({ active = false }) {
   return <span className={active ? 'org-badge org-badge-on' : 'org-badge org-badge-off'}>{active ? 'Actif' : 'Inactif'}</span>;
-}
-
-function RowActions({ onEdit, onToggle, active }) {
-  return (
-    <div className="org-row-actions">
-      <button type="button" className="org-btn org-btn-ghost" onClick={onEdit}>Modifier</button>
-      <button type="button" className={active ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={onToggle}>
-        {active ? 'Désactiver' : 'Réactiver'}
-      </button>
-    </div>
-  );
 }
 
 function OrgTable({ headers, rows }) {
