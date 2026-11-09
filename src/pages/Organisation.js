@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLocationDot, faUsers, faShieldHalved, faEye, faEllipsis, faPen, faTrash, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/Sidebar';
 import API_BASE_URL from '../config/apiConfig';
 import './Organisation.css';
 import './Dashboard.css';
-import { backendMsisdn, formatMsisdn, isLocalMsisdn, isNni, localMsisdn, nniDigits } from '../utils/saisie';
+import { backendMsisdn, isLocalMsisdn, isNni, localMsisdn, nniDigits } from '../utils/saisie';
 
 const EMPTY_SEAT = {
   matricule: '',
@@ -107,17 +109,6 @@ function identityProblem(seat) {
   return '';
 }
 
-function membersLabel(eam) {
-  const list = Array.isArray(eam && eam.membres) ? eam.membres : [];
-  if (list.length === 0) return '—';
-  return list.map((member) => {
-    const name = [member.prenom, member.nom].filter(Boolean).join(' ');
-    const ids = [member.nni, formatMsisdn(member.msisdn)].filter((item) => item && item !== '—').join(' · ');
-    if (name && ids) return `${name} (${ids})`;
-    return name || ids || '—';
-  }).join(' · ');
-}
-
 const Organisation = () => {
   const [data, setData] = useState({ pams: [], eams: [], users: [] });
   const [loading, setLoading] = useState(true);
@@ -126,6 +117,7 @@ const Organisation = () => {
   const [saving, setSaving] = useState(false);
   const [selectedPamId, setSelectedPamId] = useState(null);
   const [selectedZoneId, setSelectedZoneId] = useState(null);
+  const [menuKey, setMenuKey] = useState('');
   const [composer, setComposer] = useState(null);
   const [territoires, setTerritoires] = useState([]);
   const [zoneId, setZoneId] = useState('');
@@ -557,35 +549,43 @@ const Organisation = () => {
       <Sidebar />
       <main className="main-content org-page">
         <header className="main-header org-head">
-          <div>
-            <h1>Organisation</h1>
-            <p>Gérez facilement votre structure organisationnelle</p>
+          <div className="org-title">
+            <span className="org-title-icon" aria-hidden="true"><FontAwesomeIcon icon={faUsers} /></span>
+            <div>
+              <h1>Organisation</h1>
+              <p>Gérez facilement votre structure organisationnelle</p>
+            </div>
           </div>
         </header>
 
         <section className="org-flow" aria-label="Chaîne d'organisation">
           <article className="org-flow-card org-flow-zone">
+            <FontAwesomeIcon icon={faLocationDot} />
             <strong>Zone</strong>
             <span>Regroupe une ou plusieurs wilayas</span>
           </article>
           <span className="org-flow-arrow" aria-hidden="true">→</span>
           <article className="org-flow-card org-flow-pam">
+            <FontAwesomeIcon icon={faUsers} />
             <strong>PAM</strong>
             <span>Responsable de la zone et de son organisation</span>
           </article>
           <span className="org-flow-arrow" aria-hidden="true">→</span>
-          <div className="org-flow-pair">
-            <article className="org-flow-card org-flow-sam">
+          <article className="org-flow-split">
+            <div className="org-flow-sam">
+              <FontAwesomeIcon icon={faUsers} />
               <strong>SAM</strong>
               <span>Supervise les équipes</span>
-            </article>
-            <article className="org-flow-card org-flow-cam">
+            </div>
+            <div className="org-flow-cam">
+              <FontAwesomeIcon icon={faShieldHalved} />
               <strong>CAM</strong>
               <span>Valide les marchands de grande taille</span>
-            </article>
-          </div>
+            </div>
+          </article>
           <span className="org-flow-arrow" aria-hidden="true">→</span>
           <article className="org-flow-card org-flow-team">
+            <FontAwesomeIcon icon={faUsers} />
             <strong>Équipes</strong>
             <span>Chaque équipe a un SAM et deux membres</span>
           </article>
@@ -596,10 +596,10 @@ const Organisation = () => {
 
         <section className="org-panel">
           <div className="org-section-head">
-            <h2>Zones</h2>
+            <h2><FontAwesomeIcon icon={faLocationDot} /> Zones</h2>
             <button
               type="button"
-              className="btn btn-primary"
+              className="org-btn-solid"
               onClick={() => {
                 setZoneDraft({ id: '', nom: '', wilayas: [] });
                 setComposer('zone');
@@ -655,11 +655,15 @@ const Organisation = () => {
                 linked.length ? linked.map((pam) => pam.nom).join(', ') : '—',
                 <StatusBadge key={`${zone._id}-s`} active />,
                 <div className="org-row-actions" key={`${zone._id}-a`}>
-                  <button type="button" className="org-btn org-btn-ghost" onClick={() => openZone(zone)}>Consulter</button>
-                  <button type="button" className="org-btn org-btn-ghost" onClick={() => { setZoneDraft({ id: zone._id, nom: zone.nom, wilayas: [...(zone.wilayas || [])] }); setComposer('zone'); focusEditor(); }}>Wilayas</button>
-                  {!zoneEstOfficielle(zone) && (
-                    <button type="button" className="org-btn org-btn-danger" onClick={() => removeZone(zone)}>Supprimer</button>
-                  )}
+                  <button type="button" className="org-btn org-btn-eye" onClick={() => openZone(zone)}>
+                    <FontAwesomeIcon icon={faEye} /> Consulter
+                  </button>
+                  <RowMenu id={`zone-${zone._id}`} menuKey={menuKey} setMenuKey={setMenuKey}>
+                    <button type="button" onClick={() => { setMenuKey(''); setZoneDraft({ id: zone._id, nom: zone.nom, wilayas: [...(zone.wilayas || [])] }); setComposer('zone'); focusEditor(); }}>Wilayas</button>
+                    {!zoneEstOfficielle(zone) && (
+                      <button type="button" onClick={() => { setMenuKey(''); removeZone(zone); }}>Supprimer</button>
+                    )}
+                  </RowMenu>
                 </div>,
               ];
             })}
@@ -670,7 +674,7 @@ const Organisation = () => {
           <section className="org-split">
             <article className="org-panel org-pam-card">
               <div className="org-section-head">
-                <h2>Détails du PAM</h2>
+                <h2><FontAwesomeIcon icon={faShieldHalved} /> Détails du PAM</h2>
                 {zonePams.length === 0 && (
                   <button
                     type="button"
@@ -726,12 +730,9 @@ const Organisation = () => {
 
             <article className="org-panel">
               <div className="org-section-head">
-                <div>
-                  <h2>Collaborateurs{selectedPam ? ` du PAM (${selectedPam.nom})` : ''}</h2>
-                  <p>Un seul formulaire. Le rôle SAM ou CAM fixe les droits.</p>
-                </div>
-                <button type="button" className="btn btn-primary" onClick={() => startCollab(linkForm.role || 'sam')} disabled={!selectedPam}>
-                  Ajouter un collaborateur
+                <h2><FontAwesomeIcon icon={faUsers} /> Collaborateurs{selectedPam ? ` du PAM (${selectedPam.nom})` : ''}</h2>
+                <button type="button" className="org-btn-soft" onClick={() => startCollab(linkForm.role || 'sam')} disabled={!selectedPam}>
+                  <FontAwesomeIcon icon={faUserPlus} /> Ajouter un collaborateur
                 </button>
               </div>
               <OrgTable
@@ -742,9 +743,16 @@ const Organisation = () => {
                   <span key={user._id} className={user.role === 'cam' ? 'org-role org-role-cam' : 'org-role org-role-sam'}>{user.role === 'cam' ? 'CAM' : 'SAM'}</span>,
                   isActive(user) ? <StatusBadge active /> : <StatusBadge />,
                   <div className="org-row-actions" key={`${user._id}-a`}>
-                    <button type="button" className="org-btn org-btn-ghost" onClick={() => startUserEdit(user)}>Modifier</button>
-                    <button type="button" className={isActive(user) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('users', user)}>
-                      {isActive(user) ? 'Désactiver' : 'Réactiver'}
+                    <button type="button" className="org-icon-btn" aria-label="Modifier" onClick={() => startUserEdit(user)}>
+                      <FontAwesomeIcon icon={faPen} />
+                    </button>
+                    <button
+                      type="button"
+                      className="org-icon-btn org-icon-danger"
+                      aria-label={isActive(user) ? 'Désactiver' : 'Réactiver'}
+                      onClick={() => toggleActif('users', user)}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
                     </button>
                   </div>,
                 ])}
@@ -826,13 +834,10 @@ const Organisation = () => {
         {selectedZone && (
           <section className="org-panel">
             <div className="org-section-head">
-              <div>
-                <h2>Équipes</h2>
-                <p>Le compte est généré avec l'équipe. Elle enrôle dans la zone du PAM. Deux membres, un SAM responsable.</p>
-              </div>
+              <h2><FontAwesomeIcon icon={faUsers} /> Équipes</h2>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="org-btn-solid"
                 disabled={!selectedPam}
                 onClick={() => {
                   if (!pamReady(selectedPam)) {
@@ -882,20 +887,28 @@ const Organisation = () => {
               </form>
             )}
             <OrgTable
-              headers={['Équipe', 'SAM responsable', 'Membres', 'Périmètre', 'Statut', 'Actions']}
-              rows={teams.map((eam) => [
-                eam.nom,
-                personLabel(eam.samId),
-                membersLabel(eam),
-                selectedZone.nom,
-                isActive(eam) ? <StatusBadge active /> : <StatusBadge />,
-                <div className="org-row-actions" key={eam._id}>
-                  <button type="button" className="org-btn org-btn-ghost" onClick={() => startTeamEdit(eam)}>Détails</button>
-                  <button type="button" className={isActive(eam) ? 'org-btn org-btn-warn' : 'org-btn org-btn-ok'} onClick={() => toggleActif('eams', eam)}>
-                    {isActive(eam) ? 'Désactiver' : 'Réactiver'}
-                  </button>
-                </div>,
-              ])}
+              headers={['Équipe', 'SAM responsable', 'Membres', 'Moughataa(x) / Localités', 'Statut', 'Actions']}
+              rows={teams.map((eam) => {
+                const count = Array.isArray(eam.membres) ? eam.membres.length : 0;
+                const cover = (selectedZone.wilayas || []).join(', ') || selectedZone.nom;
+                return [
+                  eam.nom,
+                  personLabel(eam.samId),
+                  <span className="org-members" key={`${eam._id}-m`}><FontAwesomeIcon icon={faUsers} /> {count} membre{count > 1 ? 's' : ''}</span>,
+                  cover,
+                  isActive(eam) ? <StatusBadge active /> : <StatusBadge />,
+                  <div className="org-row-actions" key={eam._id}>
+                    <button type="button" className="org-btn org-btn-eye" onClick={() => startTeamEdit(eam)}>
+                      <FontAwesomeIcon icon={faEye} /> Détails
+                    </button>
+                    <RowMenu id={`eam-${eam._id}`} menuKey={menuKey} setMenuKey={setMenuKey}>
+                      <button type="button" onClick={() => { setMenuKey(''); toggleActif('eams', eam); }}>
+                        {isActive(eam) ? 'Désactiver' : 'Réactiver'}
+                      </button>
+                    </RowMenu>
+                  </div>,
+                ];
+              })}
             />
           </section>
         )}
@@ -1053,6 +1066,18 @@ function Field({ label, children }) {
 
 function StatusBadge({ active = false }) {
   return <span className={active ? 'org-badge org-badge-on' : 'org-badge org-badge-off'}>{active ? 'Actif' : 'Inactif'}</span>;
+}
+
+function RowMenu({ id, menuKey, setMenuKey, children }) {
+  const open = menuKey === id;
+  return (
+    <div className="org-menu">
+      <button type="button" className="org-icon-btn" aria-label="Autres actions" aria-expanded={open} onClick={() => setMenuKey(open ? '' : id)}>
+        <FontAwesomeIcon icon={faEllipsis} />
+      </button>
+      {open && <div className="org-menu-pop">{children}</div>}
+    </div>
+  );
 }
 
 function OrgTable({ headers, rows }) {

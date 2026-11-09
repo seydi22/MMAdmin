@@ -430,10 +430,36 @@
 .org-role-cam { background: #fff1e8; color: var(--color-primary-dark); }
 .org-role-pam { background: #e8f1fb; color: var(--color-secondary); }
 
+.org-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.org-title h1 {
+  margin: 0;
+}
+
+.org-title-icon {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 12px;
+  background: #e8f1fb;
+  color: var(--color-secondary);
+  font-size: 1.05rem;
+}
+
 .org-head p {
-  margin: 0.2rem 0 0;
+  margin: 0.15rem 0 0;
   color: var(--color-text-light);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+}
+
+.org-section-head h2 svg {
+  margin-right: 0.45rem;
+  color: var(--color-secondary);
 }
 
 .org-flow {
@@ -443,50 +469,187 @@
   margin: 0.4rem 0 1.15rem;
 }
 
+.org-flow-card,
+.org-flow-sam,
+.org-flow-cam {
+  min-width: 0;
+  border-radius: 16px;
+  padding: 0.95rem 0.75rem 0.85rem;
+  text-align: center;
+}
+
 .org-flow-card {
   flex: 1;
-  min-width: 0;
-  border-radius: 14px;
-  padding: 0.85rem 0.9rem;
-  border: 1px solid transparent;
+}
+
+.org-flow-card svg,
+.org-flow-sam svg,
+.org-flow-cam svg {
+  font-size: 1.15rem;
 }
 
 .org-flow-card strong,
-.org-flow-card span {
+.org-flow-card span,
+.org-flow-sam strong,
+.org-flow-sam span,
+.org-flow-cam strong,
+.org-flow-cam span {
   display: block;
 }
 
-.org-flow-card strong {
-  font-size: 0.95rem;
+.org-flow-card strong,
+.org-flow-sam strong,
+.org-flow-cam strong {
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.org-flow-card span {
-  margin-top: 0.25rem;
-  font-size: 0.82rem;
+.org-flow-card span,
+.org-flow-sam span,
+.org-flow-cam span {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
   line-height: 1.35;
 }
 
 .org-flow-zone,
-.org-flow-pam,
-.org-flow-sam,
+.org-flow-pam {
+  background: #e8f2fb;
+  color: #1d4f91;
+}
+
 .org-flow-team {
-  background: #e8f1fb;
-  color: var(--color-secondary);
+  background: #f3eefe;
+  color: #6d4bb5;
+}
+
+.org-flow-split {
+  flex: 1.45;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-width: 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.org-flow-sam {
+  background: #e7f6ee;
+  color: #1f8a4c;
 }
 
 .org-flow-cam {
-  background: #fff1e8;
-  color: var(--color-primary-dark);
+  background: #fff1e6;
+  color: #e07a2f;
 }
 
-.org-flow-pair {
-  flex: 1.35;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.45rem;
-  min-width: 0;
+.org-btn-solid,
+.org-btn-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.org-btn-solid {
+  border: 0;
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+.org-btn-solid:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.org-btn-soft {
+  border: 1px solid #c9d7ea;
+  background: #f4f8fd;
+  color: var(--color-secondary);
+}
+
+.org-btn-soft:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.org-btn-eye {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-secondary);
+  border-color: #d5e2f2;
+  background: #fff;
+}
+
+.org-icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #60758c;
+  cursor: pointer;
+}
+
+.org-icon-btn:hover {
+  background: #f3f6fb;
+  color: var(--color-secondary);
+}
+
+.org-icon-danger:hover {
+  background: #fdecea;
+  color: #9b1c1c;
+}
+
+.org-menu {
+  position: relative;
+}
+
+.org-menu-pop {
+  position: absolute;
+  right: 0;
+  top: 2.1rem;
+  z-index: 5;
+  min-width: 9rem;
+  padding: 0.35rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(16, 36, 64, 0.12);
+}
+
+.org-menu-pop button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  cursor: pointer;
+}
+
+.org-menu-pop button:hover {
+  background: #f4f8fd;
+}
+
+.org-members {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+.org-facts dt::after {
+  content: " :";
 }
 
 .org-flow-arrow {
