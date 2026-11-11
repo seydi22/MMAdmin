@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, Marker, Popup } from 'react-leaflet';
 import Sidebar from '../components/Sidebar';
+import { DEFAULT_MAP_BASE, MapBaseLayer, MapBaseSelect } from '../components/MapBase';
 import API_BASE_URL from '../config/apiConfig';
 import { formatMerchantStatutLabel, STATUT_REJETE_DEFINITIF } from '../utils/merchantStatus';
 
@@ -60,23 +61,6 @@ const MapLegend = () => (
   </div>
 );
 
-const TileLayerSwitcher = ({ tileLayer, setTileLayer }) => {
-  const tileLayers = {
-    osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: 'OpenStreetMap' },
-    cartoDark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: 'CartoDB Dark' },
-  };
-  return (
-    <div className="control-group">
-      <label htmlFor="tile-layer-select">Fond de carte :</label>
-      <select id="tile-layer-select" value={tileLayer} onChange={(e) => setTileLayer(e.target.value)}>
-        {Object.keys(tileLayers).map(key => (
-          <option key={key} value={tileLayers[key].url}>{tileLayers[key].name}</option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
 const MerchantMap = () => {
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +72,7 @@ const MerchantMap = () => {
   ));
   const [agentFilter, setAgentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+  const [mapBase, setMapBase] = useState(DEFAULT_MAP_BASE);
 
   const mapRef = useRef(null);
   const markerRefs = useRef({});
@@ -157,7 +141,7 @@ const MerchantMap = () => {
 
     return (
       <MapContainer whenCreated={instance => { mapRef.current = instance; }} center={nouakchottPosition} zoom={13} className="leaflet-container">
-        <TileLayer url={tileLayer} attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+        <MapBaseLayer baseId={mapBase} />
         <MapLegend />
         {filteredMerchants.map(merchant => (
           <Marker
@@ -221,7 +205,7 @@ const MerchantMap = () => {
                 </select>
               </div>
             )}
-            <TileLayerSwitcher tileLayer={tileLayer} setTileLayer={setTileLayer} />
+            <MapBaseSelect id="tile-layer-select" value={mapBase} onChange={setMapBase} />
           </div>
           <div className="map-view-container">{renderMap()}</div>
         </div>

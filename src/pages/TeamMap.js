@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet';
 import Sidebar from '../components/Sidebar';
+import { DEFAULT_MAP_BASE, MapBaseLayer, MapBaseSelect } from '../components/MapBase';
 import API_BASE_URL from '../config/apiConfig';
 
 import 'leaflet/dist/leaflet.css';
@@ -54,23 +55,6 @@ const TeamLegend = () => (
   </div>
 );
 
-const TileLayerSwitcher = ({ tileLayer, setTileLayer }) => {
-  const tileLayers = {
-    osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: 'OpenStreetMap' },
-    cartoDark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: 'CartoDB Dark' },
-  };
-  return (
-    <div className="control-group">
-      <label htmlFor="team-tile-layer">Fond de carte :</label>
-      <select id="team-tile-layer" value={tileLayer} onChange={(e) => setTileLayer(e.target.value)}>
-        {Object.keys(tileLayers).map((key) => (
-          <option key={key} value={tileLayers[key].url}>{tileLayers[key].name}</option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
 const TeamMap = () => {
   const [jour, setJour] = useState(todayKey);
   const [showTeams, setShowTeams] = useState(true);
@@ -79,7 +63,7 @@ const TeamMap = () => {
   const [traces, setTraces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tileLayer, setTileLayer] = useState('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+  const [mapBase, setMapBase] = useState(DEFAULT_MAP_BASE);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -152,7 +136,7 @@ const TeamMap = () => {
         zoom={13}
         className="leaflet-container"
       >
-        <TileLayer url={tileLayer} attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+        <MapBaseLayer baseId={mapBase} />
         <TeamLegend />
         {showPaths && traces.map((trace, index) => {
           const color = TRACE_COLORS[index % TRACE_COLORS.length];
@@ -235,7 +219,7 @@ const TeamMap = () => {
                 </ul>
               )}
             </div>
-            <TileLayerSwitcher tileLayer={tileLayer} setTileLayer={setTileLayer} />
+            <MapBaseSelect id="team-tile-layer" value={mapBase} onChange={setMapBase} />
           </div>
           <div className="map-view-container">{renderMap()}</div>
         </div>
