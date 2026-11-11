@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSun, faMoon, faEye } from '@fortawesome/free-solid-svg-icons';
 import { applyTheme, readTheme, THEMES } from '../utils/theme';
 
 const HINT = {
   clair: 'Affichage clair',
   sombre: 'Affichage sombre',
   yeux: 'Protection des yeux, fond chaud et moins de bleu',
+};
+
+const ICONS = {
+  clair: faSun,
+  sombre: faMoon,
+  yeux: faEye,
 };
 
 const ThemeSwitch = () => {
@@ -24,11 +32,12 @@ const ThemeSwitch = () => {
           type="button"
           role="radio"
           aria-checked={theme === item.id}
+          aria-label={HINT[item.id]}
           title={HINT[item.id]}
           className={theme === item.id ? 'is-active' : ''}
           onClick={() => applyTheme(item.id)}
         >
-          {item.label}
+          <FontAwesomeIcon icon={ICONS[item.id]} />
         </button>
       ))}
     </div>

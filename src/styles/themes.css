@@ -119,14 +119,16 @@ html[data-theme="yeux"] .org-title-icon {
 }
 
 .theme-switch button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 8px;
-  padding: 0.4rem 0.2rem;
+  padding: 0.45rem 0.2rem;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
 }
 
