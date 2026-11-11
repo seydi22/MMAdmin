@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import api from '../services/api';
 import './Login.css';
 import logo from '../image/logo.png';
+import ThemeSwitch from '../components/ThemeSwitch';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -58,6 +59,7 @@ const Login = () => {
       </section>
       <section className="login-form-container">
         <form className="login-form" onSubmit={handleSubmit}>
+          <ThemeSwitch />
           <h2>Connexion</h2>
           <p className="login-intro">Administrateur central, comptes back-office et gestionnaire de stock.</p>
           {error && <div className="login-alert" role="alert">{error}</div>}

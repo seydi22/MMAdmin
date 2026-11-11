@@ -24,6 +24,7 @@ import AntiFraude from './pages/AntiFraude';
 import Stock from './pages/Stock';
 import AucuneHabilitation from './pages/AucuneHabilitation';
 import './styles/surfaces.css';
+import './styles/themes.css';
 
 /**
  * Composant principal de l'application gérant toutes les routes.

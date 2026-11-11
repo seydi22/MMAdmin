@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/design-system.css';
+import { applyTheme, readTheme } from './utils/theme';
 import App from './App';
+
+applyTheme(readTheme());
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

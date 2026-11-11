@@ -1,0 +1,145 @@
+html[data-theme="sombre"] {
+  color-scheme: dark;
+  --color-primary: #f07a3a;
+  --color-primary-dark: #d4652c;
+  --color-secondary: #4c9be0;
+  --color-secondary-dark: #2f7ab8;
+  --color-text-dark: #e7eef6;
+  --color-text-light: #a9b7c6;
+  --color-background-light: #1a2330;
+  --color-background-grey: #10161d;
+  --color-border: #2d3b4c;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="yeux"] {
+  color-scheme: light;
+  --color-primary: #d06a22;
+  --color-primary-dark: #b45818;
+  --color-secondary: #0f6e62;
+  --color-secondary-dark: #0b574e;
+  --color-text-dark: #3a3124;
+  --color-text-light: #6d5e48;
+  --color-background-light: #fbf6ea;
+  --color-background-grey: #f3ead6;
+  --color-border: #e4d3b4;
+  --shadow-sm: 0 1px 2px rgba(90, 60, 20, 0.06);
+  --shadow-md: 0 8px 24px rgba(90, 60, 20, 0.08);
+}
+
+html[data-theme="sombre"] .card,
+html[data-theme="sombre"] .org-panel,
+html[data-theme="sombre"] .form-control,
+html[data-theme="sombre"] select,
+html[data-theme="sombre"] textarea,
+html[data-theme="sombre"] .table,
+html[data-theme="sombre"] .table thead th,
+html[data-theme="sombre"] .login-page,
+html[data-theme="sombre"] .login-form-container,
+html[data-theme="yeux"] .card,
+html[data-theme="yeux"] .org-panel,
+html[data-theme="yeux"] .form-control,
+html[data-theme="yeux"] select,
+html[data-theme="yeux"] textarea,
+html[data-theme="yeux"] .table,
+html[data-theme="yeux"] .table thead th,
+html[data-theme="yeux"] .login-page,
+html[data-theme="yeux"] .login-form-container {
+  background-color: var(--color-background-light);
+  color: var(--color-text-dark);
+  border-color: var(--color-border);
+}
+
+html[data-theme="sombre"] .login-screen,
+html[data-theme="yeux"] .login-screen {
+  background: var(--color-background-grey);
+}
+
+html[data-theme="sombre"] .login-branding {
+  background: #16324a;
+}
+
+html[data-theme="yeux"] .login-branding,
+html[data-theme="yeux"] .sidebar {
+  background: #0f6e62;
+}
+
+html[data-theme="sombre"] .sidebar {
+  background: #0d1520;
+}
+
+html[data-theme="sombre"] .table tbody tr:hover,
+html[data-theme="sombre"] .main-content .stock-table tbody tr:hover,
+html[data-theme="sombre"] .main-content .portal-table tbody tr:hover,
+html[data-theme="sombre"] .main-content .logs-table tbody tr:hover,
+html[data-theme="sombre"] .main-content .merchants-table tbody tr:hover {
+  background: #243140;
+}
+
+html[data-theme="sombre"] .main-content .org-table thead th,
+html[data-theme="sombre"] .main-content .stock-table th,
+html[data-theme="sombre"] .main-content .logs-table th,
+html[data-theme="sombre"] .main-content .merchants-table th,
+html[data-theme="yeux"] .main-content .org-table thead th,
+html[data-theme="yeux"] .main-content .stock-table th,
+html[data-theme="yeux"] .main-content .logs-table th,
+html[data-theme="yeux"] .main-content .merchants-table th {
+  background: var(--color-background-grey);
+  color: var(--color-text-light);
+}
+
+html[data-theme="sombre"] .org-flow-zone,
+html[data-theme="sombre"] .org-flow-pam,
+html[data-theme="sombre"] .org-title-icon {
+  background: #1e3348;
+  color: #9ec9ef;
+}
+
+html[data-theme="yeux"] .org-flow-zone,
+html[data-theme="yeux"] .org-flow-pam,
+html[data-theme="yeux"] .org-title-icon {
+  background: #efe4cc;
+  color: #0f6e62;
+}
+
+.theme-switch {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.login-form .theme-switch {
+  background: var(--color-background-grey);
+  margin-bottom: 1rem;
+}
+
+.theme-switch button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.4rem 0.2rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sidebar .theme-switch button {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.theme-switch button.is-active {
+  background: #fff;
+  color: var(--color-secondary);
+}
+
+html[data-theme="sombre"] .login-form .theme-switch button.is-active {
+  background: #243140;
+  color: var(--color-text-dark);
+}

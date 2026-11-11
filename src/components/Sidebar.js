@@ -7,6 +7,7 @@ import { faFileAlt, faChartLine, faSignOutAlt, faStore, faCheckDouble, faCog, fa
 import './Sidebar.css';
 import logo from '../image/logo.png';
 import { canSee } from '../utils/portalAccess';
+import ThemeSwitch from './ThemeSwitch';
 
 const LINKS = [
   { key: 'dashboard', to: '/', icon: faChartLine, label: 'Dashboard' },
@@ -85,6 +86,7 @@ const Sidebar = () => {
         )}
       </nav>
       <div className="sidebar-footer">
+        <ThemeSwitch />
         <button onClick={handleLogout} className="btn btn-outline-light w-100">
           <FontAwesomeIcon icon={faSignOutAlt} />
           <span>Déconnexion</span>
